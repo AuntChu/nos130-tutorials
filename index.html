@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOS 130 Interactive Tutorials</title>
+  <meta name="description" content="Interactive tutorials for NOS 130: Windows Single User.">
+  <style>
+    :root {
+      --navy: #1e2761;
+      --teal: #028090;
+      --teal-light: #0fb8cc;
+      --green: #39d353;
+      --surface: #161b22;
+      --surface-2: #1c2128;
+      --surface-3: #21262d;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #9aa4af;
+      --white: #ffffff;
+      --focus: #f5a623;
+      --max-width: 980px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(2, 128, 144, 0.18), transparent 32rem),
+        linear-gradient(180deg, #0d1117 0%, #111722 100%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    a:focus-visible,
+    button:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 4px;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      z-index: 1000;
+      background: var(--white);
+      color: #111;
+      padding: 0.75rem 1rem;
+      border-radius: 0 0 6px 0;
+      font-weight: 700;
+    }
+
+    .skip-link:focus {
+      left: 0;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      background: rgba(22, 27, 34, 0.92);
+      backdrop-filter: blur(12px);
+    }
+
+    .header-inner,
+    main,
+    footer {
+      width: min(calc(100% - 2rem), var(--max-width));
+      margin: 0 auto;
+    }
+
+    .header-inner {
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .course-code {
+      font-family: Consolas, "SFMono-Regular", monospace;
+      color: var(--teal-light);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .instructor {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    main {
+      padding: 4rem 0 5rem;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.4fr 0.8fr;
+      gap: 2rem;
+      align-items: center;
+      margin-bottom: 3rem;
+    }
+
+    .eyebrow {
+      margin: 0 0 0.75rem;
+      color: var(--teal-light);
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 13ch;
+      font-size: clamp(2.3rem, 7vw, 4.8rem);
+      line-height: 1.02;
+      letter-spacing: -0.04em;
+    }
+
+    .hero p {
+      max-width: 62ch;
+      margin: 1.25rem 0 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .hero-panel {
+      background: linear-gradient(145deg, rgba(2, 128, 144, 0.18), rgba(30, 39, 97, 0.22));
+      border: 1px solid rgba(15, 184, 204, 0.45);
+      border-radius: 18px;
+      padding: 1.5rem;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+    }
+
+    .hero-panel-label {
+      margin: 0 0 0.75rem;
+      color: var(--teal-light);
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .hero-panel ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      color: var(--text);
+    }
+
+    .hero-panel li + li {
+      margin-top: 0.55rem;
+    }
+
+    .section-heading {
+      margin-bottom: 1rem;
+    }
+
+    .section-heading h2 {
+      margin: 0 0 0.35rem;
+      font-size: 1.75rem;
+    }
+
+    .section-heading p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .tutorial-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .tutorial-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 300px;
+      padding: 1.4rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .tutorial-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--teal);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+    }
+
+    .unit-number {
+      margin-bottom: 1rem;
+      color: var(--teal-light);
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .tutorial-card h3 {
+      margin: 0;
+      font-size: 1.35rem;
+      line-height: 1.3;
+    }
+
+    .tutorial-card p {
+      margin: 0.85rem 0 1.25rem;
+      color: var(--muted);
+    }
+
+    .topic-list {
+      margin: 0 0 1.5rem;
+      padding-left: 1.15rem;
+      color: var(--text);
+      font-size: 0.94rem;
+    }
+
+    .topic-list li + li {
+      margin-top: 0.35rem;
+    }
+
+    .card-actions {
+      margin-top: auto;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0.72rem 1rem;
+      border-radius: 8px;
+      background: var(--teal);
+      color: var(--white);
+      text-decoration: none;
+      font-weight: 700;
+      transition: background 180ms ease, transform 180ms ease;
+    }
+
+    .button:hover {
+      background: var(--teal-light);
+    }
+
+    .button::after {
+      content: " →";
+      margin-left: 0.4rem;
+    }
+
+    .coming-soon {
+      border-style: dashed;
+      opacity: 0.78;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      width: fit-content;
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
+      background: rgba(57, 211, 83, 0.1);
+      border: 1px solid rgba(57, 211, 83, 0.5);
+      color: var(--green);
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .status::before {
+      content: "●";
+      font-size: 0.7rem;
+    }
+
+    .coming-label {
+      display: inline-flex;
+      width: fit-content;
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .help-note {
+      margin-top: 2rem;
+      padding: 1rem 1.2rem;
+      background: var(--surface);
+      border-left: 4px solid var(--teal);
+      border-radius: 0 10px 10px 0;
+      color: var(--muted);
+    }
+
+    .help-note strong {
+      color: var(--text);
+    }
+
+    footer {
+      padding: 1.5rem 0 2.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .header-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 0.9rem 0;
+      }
+
+      main {
+        padding-top: 2.5rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header>
+    <div class="header-inner">
+      <div class="course-code">NOS 130 / Windows Single User</div>
+      <div class="instructor">Interactive Learning Tutorials</div>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <section class="hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">Learn · Practice · Apply</p>
+        <h1 id="page-title">Interactive Tutorials</h1>
+        <p>
+          Explore Windows 11 concepts through guided explanations, simulations,
+          practice exercises, and knowledge checks. Select a unit below to begin.
+        </p>
+      </div>
+
+      <aside class="hero-panel" aria-label="Tutorial information">
+        <p class="hero-panel-label">Before you begin</p>
+        <ul>
+          <li>Use a current version of Chrome, Edge, or Firefox.</li>
+          <li>Complete each section in order.</li>
+          <li>Open the tutorial in a new window when using a phone or tablet.</li>
+          <li>Your work is for practice and is not sent to the Canvas Gradebook.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section aria-labelledby="tutorials-heading">
+      <div class="section-heading">
+        <h2 id="tutorials-heading">Available Tutorials</h2>
+        <p>More units will be added throughout the course.</p>
+      </div>
+
+      <div class="tutorial-grid">
+        <article class="tutorial-card">
+          <div class="status">Available now</div>
+          <div class="unit-number">Unit 1</div>
+          <h3>Getting Oriented in Windows 11</h3>
+          <p>
+            Build confidence with the Windows 11 desktop, productivity tools,
+            Settings, Search, accessibility features, and keyboard shortcuts.
+          </p>
+          <ul class="topic-list">
+            <li>Desktop and taskbar components</li>
+            <li>Snap Layouts and virtual desktops</li>
+            <li>Settings versus Control Panel</li>
+            <li>Windows Search</li>
+            <li>Accessibility and shortcuts</li>
+          </ul>
+          <div class="card-actions">
+            <a class="button" href="./unit1/">Start Unit 1 Tutorial</a>
+          </div>
+        </article>
+
+        <article class="tutorial-card coming-soon">
+          <div class="coming-label">Coming soon</div>
+          <div class="unit-number">Future Units</div>
+          <h3>More Interactive Practice</h3>
+          <p>
+            Additional tutorials will appear here as they are added to the course.
+          </p>
+          <ul class="topic-list">
+            <li>Guided demonstrations</li>
+            <li>Interactive simulations</li>
+            <li>Practice checks</li>
+            <li>End-of-unit summaries</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="help-note">
+        <strong>Having trouble?</strong>
+        Open the tutorial in a new browser tab and make sure JavaScript is enabled.
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>NOS 130 · Windows Single User · Blue Ridge Community College</p>
+  </footer>
+</body>
+</html>
