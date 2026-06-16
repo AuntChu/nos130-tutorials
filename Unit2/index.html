@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOS130 Unit 2 — Intro to Microsoft 365 and Intune</title>
+<style>
+/* ── OFFLINE SYSTEM FONTS ─────────────────────────────────────────────── */
+:root{
+  --mono: Consolas,'SF Mono','DejaVu Sans Mono',monospace;
+  --sans: 'Segoe UI',system-ui,-apple-system,sans-serif;
+  --navy:   #1e2761;
+  --indigo: #4338ca;
+  --indL:   #818cf8;
+  --iceBlue:#c7d2fe;
+  --green:  #39d353;
+  --amber:  #f5a623;
+  --red:    #ff6b6b;
+  --surface:#161b22;
+  --surf2:  #1c2128;
+  --surf3:  #21262d;
+  --border: #30363d;
+  --text:   #e6edf3;
+  --muted:  #8b949e;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{font-family:var(--sans);background:#0d1117;color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ── PROGRESS & CHROME ────────────────────────────────────────────────── */
+#pbar{position:fixed;top:0;left:0;right:0;z-index:100;height:3px;background:var(--border)}
+#pfill{height:100%;background:linear-gradient(90deg,var(--indigo),var(--indL));width:0%;transition:width .4s}
+#chrome{position:fixed;top:0;left:0;right:0;z-index:99;height:48px;background:var(--surf2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+.chrome-title{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--indL);letter-spacing:.12em;text-transform:uppercase}
+.step-dots{display:flex;gap:6px;align-items:center}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--border);border:1px solid var(--border);transition:all .3s;cursor:pointer}
+.sdot.active{background:var(--indigo);border-color:var(--indigo);box-shadow:0 0 8px var(--indigo)}
+.sdot.done{background:var(--green);border-color:var(--green)}
+
+/* ── APP & SCREENS ────────────────────────────────────────────────────── */
+#app{padding-top:60px;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+.screen{display:none;width:100%;max-width:860px;padding:32px 24px 48px;animation:fadeIn .35s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── TYPOGRAPHY ───────────────────────────────────────────────────────── */
+.sec-tag{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--indL);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px}
+.sec-title{font-size:28px;font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.2}
+.sec-sub{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6}
+.key{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;background:var(--surf3);border:1px solid var(--border);color:var(--amber);border-radius:4px;padding:1px 7px;white-space:nowrap}
+
+/* ── TERMINAL TYPE-IN ─────────────────────────────────────────────────── */
+.term{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin-bottom:22px;font-family:var(--mono);font-size:13px;color:var(--green);min-height:48px}
+.term::before{content:'$ ';color:var(--indL);font-weight:600}
+.cursor{display:inline-block;width:8px;height:14px;background:var(--green);margin-left:2px;animation:blink .7s step-end infinite;vertical-align:middle}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ── CARDS ────────────────────────────────────────────────────────────── */
+.card{background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin-bottom:14px}
+.card-label{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--indL);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.card p{font-size:14px;color:var(--text);line-height:1.7;margin-bottom:8px}
+.card p:last-child{margin-bottom:0}
+.card strong{color:var(--indL);font-weight:600}
+
+/* ── BUTTONS ──────────────────────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--sans);font-size:13px;font-weight:500;padding:10px 22px;border-radius:6px;cursor:pointer;border:1px solid transparent;transition:all .2s}
+.btn-primary{background:var(--indigo);color:#fff;border-color:var(--indigo)}
+.btn-primary:hover{background:var(--indL);border-color:var(--indL)}
+.btn-ghost{background:transparent;color:var(--text);border-color:var(--border)}
+.btn-ghost:hover{background:var(--surf3);border-color:var(--muted)}
+.btn-row{display:flex;gap:12px;align-items:center;margin-top:28px;flex-wrap:wrap}
+
+/* ── EXERCISE PANEL ───────────────────────────────────────────────────── */
+.ex-panel{background:var(--surface);border:1px solid var(--indigo);border-radius:10px;padding:22px;margin-top:22px}
+.ex-tag{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--amber);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+.ex-q{font-size:15px;font-weight:500;color:var(--text);margin-bottom:16px;line-height:1.5}
+
+/* ── FEEDBACK ─────────────────────────────────────────────────────────── */
+.fb{padding:10px 14px;border-radius:6px;font-size:13px;margin-top:10px;display:none;line-height:1.5}
+.fb.correct{background:rgba(57,211,83,.1);border:1px solid var(--green);color:var(--green);display:block}
+.fb.wrong{background:rgba(255,107,107,.1);border:1px solid var(--red);color:var(--red);display:block}
+.complete-bar{background:rgba(57,211,83,.05);border:1px solid var(--green);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--green);display:flex;align-items:center;gap:8px;margin-top:10px}
+
+/* ── DRAG / DROP CARDS ────────────────────────────────────────────────── */
+.drag-card{background:var(--surf3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;cursor:grab;font-size:13px;font-weight:500;color:var(--text);user-select:none;transition:all .2s;display:flex;align-items:center;gap:8px}
+.drag-card:hover{border-color:var(--indL)}
+.drag-card.dragging{opacity:.4}
+.drag-card .dc-icon{font-size:16px;width:20px;flex-shrink:0}
+.drop-zone{border:2px dashed var(--border);border-radius:8px;min-height:52px;padding:8px;display:flex;flex-direction:column;gap:6px;transition:all .2s}
+.drop-zone.hover{border-color:var(--indigo);background:rgba(67,56,202,.06)}
+.drop-zone.filled{border-style:solid;border-color:var(--indigo)}
+.drop-zone .zone-label{font-family:var(--mono);font-size:10px;color:var(--muted);padding:2px 4px;letter-spacing:.08em;display:block}
+.drop-zone .drag-card{cursor:default}
+
+/* ── OPTION BUTTONS ───────────────────────────────────────────────────── */
+.opt-btn{width:100%;text-align:left;padding:11px 16px;border-radius:7px;cursor:pointer;border:1px solid var(--border);background:var(--surf2);color:var(--text);font-size:13px;transition:all .2s;font-family:var(--sans);margin-bottom:7px}
+.opt-btn:hover:not(:disabled){border-color:var(--indL);color:var(--indL)}
+.opt-btn.correct{border-color:var(--green);background:rgba(57,211,83,.08);color:var(--green)}
+.opt-btn.wrong{border-color:var(--red);background:rgba(255,107,107,.08);color:var(--red)}
+.opt-btn:disabled{opacity:.55;cursor:not-allowed}
+
+/* ── SCENARIO CARD ────────────────────────────────────────────────────── */
+.scenario-card{background:var(--surf3);border-left:3px solid var(--indigo);border-radius:0 8px 8px 0;padding:12px 16px;font-size:14px;color:var(--text);line-height:1.6;margin-bottom:14px}
+
+/* ── MATCH TABLE ──────────────────────────────────────────────────────── */
+.match-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin-bottom:10px}
+.match-task{background:var(--surf3);border:1px solid var(--border);border-radius:7px;padding:10px 14px;font-size:12px;color:var(--text);line-height:1.4}
+.match-arrow{color:var(--muted);font-size:18px;text-align:center}
+.match-select{background:var(--surf2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:12px;color:var(--text);font-family:var(--sans);width:100%;cursor:pointer;transition:border .2s}
+.match-select:focus{outline:none;border-color:var(--indL)}
+.match-select.correct{border-color:var(--green);background:rgba(57,211,83,.08);color:var(--green)}
+.match-select.wrong{border-color:var(--red);background:rgba(255,107,107,.08);color:var(--red)}
+
+/* ── JOIN TYPE CARDS ──────────────────────────────────────────────────── */
+.jt-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+@media(max-width:600px){.jt-grid{grid-template-columns:1fr}}
+.jt-card{background:var(--surf2);border:1px solid var(--border);border-radius:9px;padding:14px;cursor:pointer;transition:all .2s}
+.jt-card:hover{border-color:var(--indL)}
+.jt-card.selected{border-color:var(--indigo);background:rgba(67,56,202,.1)}
+.jt-card.correct{border-color:var(--green);background:rgba(57,211,83,.08)}
+.jt-card.wrong{border-color:var(--red);background:rgba(255,107,107,.08)}
+.jt-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+.jt-desc{font-size:11px;color:var(--muted);line-height:1.5}
+
+/* ── AUTOPILOT SEQUENCE ───────────────────────────────────────────────── */
+.seq-steps{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.seq-step{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;border-radius:7px;background:var(--surf3);border:1px solid var(--border);cursor:pointer;transition:all .2s;font-size:13px;color:var(--text)}
+.seq-step:hover{border-color:var(--indL)}
+.seq-step.placed{opacity:.4;cursor:not-allowed}
+.seq-num{width:22px;height:22px;border-radius:50%;background:var(--indigo);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.seq-slots{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.seq-slot{min-height:44px;border:2px dashed var(--border);border-radius:7px;padding:8px 12px;display:flex;align-items:center;gap:10px;transition:all .2s;font-size:13px;color:var(--muted)}
+.seq-slot.filled{border-style:solid;border-color:var(--indigo);color:var(--text);background:rgba(67,56,202,.06)}
+.seq-slot.correct{border-color:var(--green);background:rgba(57,211,83,.06);color:var(--green)}
+.seq-slot.wrong{border-color:var(--red);background:rgba(255,107,107,.06);color:var(--red)}
+.seq-slot-num{font-family:var(--mono);font-size:10px;color:var(--muted);flex-shrink:0;width:24px}
+
+/* ── SUMMARY ──────────────────────────────────────────────────────────── */
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}
+@media(max-width:480px){.sum-grid{grid-template-columns:1fr}}
+.sum-item{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+.sum-label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px}
+.sum-value{font-size:20px;font-weight:600;color:var(--indL)}
+.sum-sub{font-size:11px;color:var(--muted);margin-top:2px}
+</style>
+</head>
+<body>
+
+<div id="pbar"><div id="pfill"></div></div>
+<div id="chrome">
+  <span class="chrome-title">NOS130 &nbsp;&#47;&nbsp; Unit 2 Tutorial</span>
+  <div class="step-dots" id="step-dots"></div>
+</div>
+
+<div id="app">
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 0 — WELCOME
+══════════════════════════════════════════════════════ -->
+<div class="screen active" id="s0">
+  <div style="padding-top:28px">
+    <div class="sec-tag">NOS130 — Unit 2 — Week 2</div>
+    <h1 class="sec-title">Intro to Microsoft 365<br>and Intune</h1>
+    <p class="sec-sub">A conceptual tutorial. No Windows machine needed — just your browser and this page.</p>
+    <div class="term" id="t0"></div>
+    <div class="card">
+      <div class="card-label">Five sections, five exercises</div>
+      <p>&#x25B8;&nbsp; <strong>Section 1</strong> — Sort Microsoft 365 services into the right categories</p>
+      <p>&#x25B8;&nbsp; <strong>Section 2</strong> — Match sign-in scenarios to the correct Entra ID feature</p>
+      <p>&#x25B8;&nbsp; <strong>Section 3</strong> — Match IT admin tasks to the correct Intune feature</p>
+      <p>&#x25B8;&nbsp; <strong>Section 4</strong> — Choose the right endpoint model for each organization</p>
+      <p>&#x25B8;&nbsp; <strong>Section 5</strong> — Identify device join types and sequence an Autopilot deployment</p>
+    </div>
+    <div class="card" style="border-color:var(--indigo)">
+      <div class="card-label">No hands-on lab this week</div>
+      <p>Unit 2 is conceptual. The quiz in your LMS is the only graded work for Week 2. Use this tutorial to check your understanding before you take it.</p>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="go(1)">Start Tutorial &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 1 — MICROSOFT 365
+══════════════════════════════════════════════════════ -->
+<div class="screen" id="s1">
+  <div class="sec-tag">Section 1 of 5</div>
+  <h2 class="sec-title">Microsoft 365</h2>
+  <p class="sec-sub">The cloud platform that hosts the services you will use throughout this course.</p>
+  <div class="term" id="t1"></div>
+
+  <div class="card">
+    <div class="card-label">The three layers</div>
+    <p><strong>Productivity Apps</strong> — The tools people use to get work done: Word, Excel, PowerPoint, Outlook, Teams, OneDrive, SharePoint.</p>
+    <p><strong>Cloud Services</strong> — Infrastructure services that run in Microsoft's data centers: Microsoft Entra ID (identity), Microsoft Intune (endpoint management), Exchange Online (email), SharePoint Online (file sharing).</p>
+    <p><strong>Security Tools</strong> — Microsoft Defender for Endpoint, Conditional Access policies, Microsoft Purview (compliance).</p>
+  </div>
+  <div class="card" style="border-color:var(--indigo)">
+    <p>Microsoft 365 is the platform. Entra ID and Intune are services that run <em>inside</em> it — not separate products.</p>
+  </div>
+
+  <div class="ex-panel">
+    <div class="ex-tag">&#x25C6; Exercise — Sort the Services</div>
+    <p class="ex-q">Drag each service card into the correct Microsoft 365 category. All nine cards must be placed.</p>
+
+    <div id="service-pool" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;min-height:44px;padding:8px;border-radius:8px;border:1px dashed var(--border)">
+      <!-- Populated by JS -->
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px" id="cat-zones">
+      <div>
+        <div class="drop-zone" id="zone-prod" ondragover="dz_over(event)" ondrop="dz_drop(event,'prod')" data-cat="prod">
+          <span class="zone-label">Productivity Apps</span>
+        </div>
+      </div>
+      <div>
+        <div class="drop-zone" id="zone-cloud" ondragover="dz_over(event)" ondrop="dz_drop(event,'cloud')" data-cat="cloud">
+          <span class="zone-label">Cloud Services</span>
+        </div>
+      </div>
+      <div>
+        <div class="drop-zone" id="zone-sec" ondragover="dz_over(event)" ondrop="dz_drop(event,'sec')" data-cat="sec">
+          <span class="zone-label">Security Tools</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="sort-fb" class="fb" style="margin-top:12px"></div>
+    <div id="sort-complete" class="complete-bar" style="display:none">&#x2713; All services sorted correctly!</div>
+    <button class="btn btn-ghost" style="margin-top:12px;font-size:12px" onclick="resetSort()">&#x21BA; Reset</button>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="go(0)">&larr; Back</button>
+    <button class="btn btn-primary" onclick="go(2)">Next: Microsoft Entra ID &rarr;</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 2 — ENTRA ID
+══════════════════════════════════════════════════════ -->
+<div class="screen" id="s2">
+  <div class="sec-tag">Section 2 of 5</div>
+  <h2 class="sec-title">Microsoft Entra ID</h2>
+  <p class="sec-sub">Cloud identity — the system that knows who you are and what you are allowed to do.</p>
+  <div class="term" id="t2"></div>
+
+  <div class="card">
+    <div class="card-label">Four core capabilities</div>
+    <p><strong>Authentication</strong> — Verifies your identity when you sign in. Supports passwords, PIN, biometrics, and multi-factor authentication.</p>
+    <p><strong>Access Control</strong> — Determines what resources you can reach after sign-in: apps, files, email, devices.</p>
+    <p><strong>Conditional Access</strong> — Adds conditions to sign-in: require MFA from outside the office, block non-compliant devices, flag unusual locations.</p>
+    <p><strong>Single Sign-On (SSO)</strong> — One login works across all connected services. Sign in once, use everything.</p>
+  </div>
+  <div class="card">
+    <div class="card-label">Entra ID vs on-premises Active Directory</div>
+    <p>On-premises AD runs on servers you own, requires domain-joined Windows PCs, and needs a VPN for remote access. Entra ID runs in Microsoft's cloud, works on any device from anywhere, and requires no servers to maintain.</p>
+  </div>
+
+  <div class="ex-panel">
+    <div class="ex-tag">&#x25C6; Exercise — Feature Identifier</div>
+    <p class="ex-q">Read each scenario. Select the Entra ID feature that best explains what is happening.</p>
+    <div id="entra-scenarios"></div>
+    <div id="entra-score" style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:10px"></div>
+    <div id="entra-complete" class="complete-bar" style="display:none">&#x2713; All scenarios identified correctly!</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="go(1)">&larr; Back</button>
+    <button class="btn btn-primary" onclick="go(3)">Next: Microsoft Intune &rarr;</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 3 — INTUNE
+══════════════════════════════════════════════════════ -->
+<div class="screen" id="s3">
+  <div class="sec-tag">Section 3 of 5</div>
+  <h2 class="sec-title">Microsoft Intune</h2>
+  <p class="sec-sub">Endpoint management at scale — configure, secure, and maintain devices without physical access.</p>
+  <div class="term" id="t3"></div>
+
+  <div class="card">
+    <div class="card-label">Six things Intune does</div>
+    <p><strong>Enroll devices</strong> — Register Windows, iOS, Android, and Mac devices into Intune management.</p>
+    <p><strong>Configuration profiles</strong> — Push settings (Wi-Fi, VPN, sleep timeout, restrictions) to devices without touching them.</p>
+    <p><strong>App deployment</strong> — Install, update, or remove apps on any enrolled device remotely.</p>
+    <p><strong>Compliance policies</strong> — Define minimum device health requirements. Block non-compliant devices from company resources.</p>
+    <p><strong>Update rings</strong> — Control when Windows updates are delivered to device groups.</p>
+    <p><strong>Remote actions</strong> — Wipe, lock, restart, or retrieve BitLocker keys from enrolled devices remotely.</p>
+  </div>
+
+  <div class="ex-panel">
+    <div class="ex-tag">&#x25C6; Exercise — Task Matcher</div>
+    <p class="ex-q">Match each IT admin task to the correct Intune feature. Select from the dropdown next to each task, then click Check Answers.</p>
+    <div id="match-rows"></div>
+    <button class="btn btn-primary" style="margin-top:10px" onclick="checkMatch()">Check Answers</button>
+    <div id="match-fb" class="fb" style="margin-top:10px"></div>
+    <div id="match-complete" class="complete-bar" style="display:none">&#x2713; All tasks matched correctly!</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="go(2)">&larr; Back</button>
+    <button class="btn btn-primary" onclick="go(4)">Next: Cloud vs Local &rarr;</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 4 — CLOUD VS LOCAL
+══════════════════════════════════════════════════════ -->
+<div class="screen" id="s4">
+  <div class="sec-tag">Section 4 of 5</div>
+  <h2 class="sec-title">Cloud-Managed vs Locally-Managed</h2>
+  <p class="sec-sub">Two models for managing Windows endpoints. Most organizations are somewhere in between.</p>
+  <div class="term" id="t4"></div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+    <div class="card" style="border-color:var(--border)">
+      <div class="card-label">Locally-Managed</div>
+      <p>Configured via Group Policy and local settings. Identity in on-premises AD. Requires corporate network or VPN. IT physically accesses devices.</p>
+    </div>
+    <div class="card" style="border-color:var(--indigo)">
+      <div class="card-label">Cloud-Managed (Intune)</div>
+      <p>Configured via Intune profiles pushed over internet. Identity in Entra ID. Works from anywhere. IT manages remotely from the Intune portal.</p>
+    </div>
+  </div>
+
+  <div class="ex-panel">
+    <div class="ex-tag">&#x25C6; Exercise — Endpoint Model Decision Tree</div>
+    <p class="ex-q">Read each organization description and choose the endpoint model that fits best. Five scenarios total.</p>
+    <div id="model-scenarios"></div>
+    <div id="model-score" style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:10px"></div>
+    <div id="model-complete" class="complete-bar" style="display:none">&#x2713; All scenarios answered!</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="go(3)">&larr; Back</button>
+    <button class="btn btn-primary" onclick="go(5)">Next: Device Join Types &rarr;</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 5 — JOIN TYPES & AUTOPILOT
+══════════════════════════════════════════════════════ -->
+<div class="screen" id="s5">
+  <div class="sec-tag">Section 5 of 5</div>
+  <h2 class="sec-title">Device Join Types &amp; Autopilot</h2>
+  <p class="sec-sub">How Windows devices connect to Entra ID — and how Autopilot automates provisioning.</p>
+  <div class="term" id="t5"></div>
+
+  <div class="card">
+    <div class="card-label">Three join types</div>
+    <p><strong>Entra Joined</strong> — Connected only to Entra ID. No on-premises domain. Cloud-native model for new devices.</p>
+    <p><strong>Entra Registered</strong> — Lightweight connection. Typically personal or BYOD devices. Limited company management, retains user ownership.</p>
+    <p><strong>Hybrid Entra Joined</strong> — Connected to both on-premises AD and Entra ID. Used during cloud migration. Still receives Group Policy from the domain.</p>
+  </div>
+  <div class="card">
+    <div class="card-label">Windows Autopilot</div>
+    <p>Automates out-of-box setup. Employee receives device, signs in with Microsoft 365 account, and Autopilot Entra-joins it, enrolls it in Intune, and pushes all apps and policies automatically. IT never touches the machine.</p>
+  </div>
+
+  <!-- Exercise 5a: Join type identifier -->
+  <div class="ex-panel" style="margin-bottom:18px">
+    <div class="ex-tag">&#x25C6; Exercise A — Join Type Identifier</div>
+    <p class="ex-q">Read each scenario and select the correct device join type.</p>
+    <div id="jt-scenarios"></div>
+    <div id="jt-score" style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:10px"></div>
+    <div id="jt-complete" class="complete-bar" style="display:none">&#x2713; All join types identified correctly!</div>
+  </div>
+
+  <!-- Exercise 5b: Autopilot sequence -->
+  <div class="ex-panel">
+    <div class="ex-tag">&#x25C6; Exercise B — Autopilot Sequence</div>
+    <p class="ex-q">Click each step in the correct order to sequence a Windows Autopilot deployment. Click the step you think happens first, then second, and so on.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:.08em">AVAILABLE STEPS</div>
+        <div id="seq-pool" class="seq-steps"></div>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:.08em">YOUR SEQUENCE</div>
+        <div id="seq-slots" class="seq-slots"></div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" style="margin-top:12px" onclick="checkSeq()">Check Sequence</button>
+    <button class="btn btn-ghost" style="margin-top:12px;font-size:12px" onclick="resetSeq()">&#x21BA; Reset</button>
+    <div id="seq-fb" class="fb" style="margin-top:10px"></div>
+    <div id="seq-complete" class="complete-bar" style="display:none">&#x2713; Correct sequence!</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="go(4)">&larr; Back</button>
+    <button class="btn btn-primary" onclick="go(6)">See Summary &rarr;</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 6 — SUMMARY
+══════════════════════════════════════════════════════ -->
+<div class="screen" id="s6">
+  <div class="sec-tag">Tutorial Complete</div>
+  <h2 class="sec-title">Unit 2 Summary</h2>
+  <p class="sec-sub">You have covered all five conceptual sections for Week 2.</p>
+  <div class="term" id="t6"></div>
+
+  <div class="sum-grid">
+    <div class="sum-item"><div class="sum-label">M365 Sort</div><div class="sum-value" id="sum-sort">—</div><div class="sum-sub">services sorted correctly</div></div>
+    <div class="sum-item"><div class="sum-label">Entra ID Scenarios</div><div class="sum-value" id="sum-entra">—</div><div class="sum-sub">features identified</div></div>
+    <div class="sum-item"><div class="sum-label">Intune Matcher</div><div class="sum-value" id="sum-match">—</div><div class="sum-sub">tasks matched correctly</div></div>
+    <div class="sum-item"><div class="sum-label">Endpoint Model</div><div class="sum-value" id="sum-model">—</div><div class="sum-sub">scenarios correct</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-label">Five things to remember</div>
+    <p>&#x25B8;&nbsp; Microsoft 365 is the platform. Entra ID and Intune are services that live inside it.</p>
+    <p>&#x25B8;&nbsp; Entra ID handles identity: authentication, access control, Conditional Access, and SSO.</p>
+    <p>&#x25B8;&nbsp; Intune manages devices: configuration, compliance, apps, updates, and remote actions.</p>
+    <p>&#x25B8;&nbsp; Cloud-managed and locally-managed are two ends of a spectrum. Most orgs are in between.</p>
+    <p>&#x25B8;&nbsp; Autopilot Entra-joins devices automatically. IT never touches the machine physically.</p>
+  </div>
+
+  <div class="card" style="border-color:var(--amber)">
+    <div class="card-label" style="color:var(--amber)">Before you move on</div>
+    <p>Complete the <strong>Unit 2 Quiz</strong> in the LMS. It tests the same vocabulary and concepts covered in this tutorial.</p>
+    <p>Unit 3 starts next week and returns to hands-on Windows work: File and Folder Management.</p>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="go(5)">&larr; Review Section 5</button>
+    <button class="btn btn-primary" onclick="restart()">&#x21BA; Restart Tutorial</button>
+  </div>
+</div>
+
+</div><!-- #app -->
+
+<script>
+// ── GLOBALS ────────────────────────────────────────────────────────────────
+const SCREENS = 7;
+let cur = 0;
+const ST = {
+  sortCorrect:0, entraCorrect:0, matchCorrect:0,
+  modelCorrect:0, jtCorrect:0, seqDone:false,
+};
+
+const TERMS = {
+  0:'loading tutorial: NOS130_unit2_m365_intune.exe...',
+  1:'module_load: microsoft365_platform.dll',
+  2:'module_load: entra_id_identity.dll',
+  3:'module_load: intune_endpoint_mgmt.dll',
+  4:'module_load: cloud_vs_local_endpoints.dll',
+  5:'module_load: device_join_types_autopilot.dll',
+  6:'tutorial_complete: all_modules_finished // ready for quiz',
+};
+
+function typeIn(id, text, speed=28) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = '';
+  let i = 0;
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  const iv = setInterval(() => {
+    if (i < text.length) { el.textContent = text.slice(0,++i); el.appendChild(cursor); }
+    else { clearInterval(iv); setTimeout(() => cursor.remove(), 1200); }
+  }, speed);
+}
+
+function go(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s'+n).classList.add('active');
+  cur = n;
+  updateNav();
+  window.scrollTo({top:0, behavior:'smooth'});
+  setTimeout(() => typeIn('t'+n, TERMS[n]||''), 200);
+  if (n===1) initSort();
+  if (n===2) initEntra();
+  if (n===3) initMatch();
+  if (n===4) initModel();
+  if (n===5) { initJT(); initSeq(); }
+  if (n===6) updateSummary();
+}
+
+function updateNav() {
+  const fill = Math.round((cur/(SCREENS-1))*100);
+  document.getElementById('pfill').style.width = fill+'%';
+  const c = document.getElementById('step-dots');
+  c.innerHTML = '';
+  for (let i=1;i<=5;i++) {
+    const d = document.createElement('div');
+    d.className = 'sdot' + (i===cur?' active':i<cur?' done':'');
+    d.onclick = () => go(i);
+    d.title = ['','M365','Entra ID','Intune','Cloud vs Local','Join Types'][i];
+    c.appendChild(d);
+  }
+}
+
+function restart() {
+  ST.sortCorrect=0;ST.entraCorrect=0;ST.matchCorrect=0;
+  ST.modelCorrect=0;ST.jtCorrect=0;ST.seqDone=false;
+  entraAnswered={}; modelAnswered={}; jtAnswered={};
+  matchChecked=false; seqPlaced=[];
+  go(0);
+}
+
+// ══════════════════════════════════════════════════
+// SECTION 1 — SERVICE SORT (drag-and-drop)
+// ══════════════════════════════════════════════════
+const SERVICES = [
+  {id:'word',    label:'Microsoft Word',        icon:'📝', cat:'prod'},
+  {id:'teams',   label:'Microsoft Teams',       icon:'💬', cat:'prod'},
+  {id:'entra',   label:'Microsoft Entra ID',    icon:'🔑', cat:'cloud'},
+  {id:'intune',  label:'Microsoft Intune',      icon:'🖥️', cat:'cloud'},
+  {id:'defender',label:'Defender for Endpoint', icon:'🛡️', cat:'sec'},
+  {id:'exchange',label:'Exchange Online',        icon:'📧', cat:'cloud'},
+  {id:'condacc', label:'Conditional Access',     icon:'🔒', cat:'sec'},
+  {id:'onedrive',label:'OneDrive',               icon:'☁️', cat:'prod'},
+  {id:'purview', label:'Microsoft Purview',      icon:'📋', cat:'sec'},
+];
+
+let sortState = {};
+let draggingSvc = null;
+
+function initSort() {
+  sortState = {};
+  const pool = document.getElementById('service-pool');
+  pool.innerHTML = '';
+  ['prod','cloud','sec'].forEach(cat => {
+    const z = document.getElementById('zone-'+cat);
+    // keep only zone-label
+    z.innerHTML = '<span class="zone-label">' +
+      (cat==='prod'?'Productivity Apps':cat==='cloud'?'Cloud Services':'Security Tools') +
+      '</span>';
+  });
+  SERVICES.forEach(svc => {
+    const el = document.createElement('div');
+    el.className = 'drag-card';
+    el.draggable = true;
+    el.id = 'svc-'+svc.id;
+    el.innerHTML = `<span class="dc-icon" style="font-size:16px">${svc.icon}</span>${svc.label}`;
+    el.ondragstart = e => { draggingSvc=svc.id; e.target.classList.add('dragging'); };
+    el.ondragend = e => e.target.classList.remove('dragging');
+    pool.appendChild(el);
+  });
+  document.getElementById('sort-fb').className = 'fb';
+  document.getElementById('sort-complete').style.display = 'none';
+}
+
+function dz_over(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('hover');
+}
+
+function dz_drop(e, cat) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('hover');
+  if (!draggingSvc) return;
+  const svc = SERVICES.find(s => s.id === draggingSvc);
+  const cardEl = document.getElementById('svc-'+draggingSvc);
+  if (!cardEl) return;
+
+  // remove from wherever it was
+  cardEl.remove();
+  sortState[draggingSvc] = cat;
+
+  const zone = document.getElementById('zone-'+cat);
+  const newCard = document.createElement('div');
+  newCard.className = 'drag-card';
+  newCard.draggable = true;
+  newCard.id = 'svc-'+svc.id;
+  newCard.innerHTML = `<span class="dc-icon" style="font-size:16px">${svc.icon}</span>${svc.label}`;
+  newCard.ondragstart = ev => { draggingSvc = svc.id; ev.target.classList.add('dragging'); };
+  newCard.ondragend = ev => ev.target.classList.remove('dragging');
+  zone.appendChild(newCard);
+
+  draggingSvc = null;
+  checkSort();
+}
+
+function checkSort() {
+  const placed = Object.keys(sortState).length;
+  if (placed < SERVICES.length) return;
+  let correct = 0;
+  SERVICES.forEach(svc => { if (sortState[svc.id] === svc.cat) correct++; });
+  ST.sortCorrect = correct;
+  const fb = document.getElementById('sort-fb');
+  if (correct === SERVICES.length) {
+    document.getElementById('sort-complete').style.display = 'flex';
+    fb.className = 'fb';
+  } else {
+    fb.textContent = `${correct} of ${SERVICES.length} correct. Incorrect items are still in the wrong zone. Try moving them.`;
+    fb.className = 'fb wrong';
+  }
+}
+
+function resetSort() { initSort(); ST.sortCorrect=0; }
+
+// ══════════════════════════════════════════════════
+// SECTION 2 — ENTRA ID SCENARIOS
+// ══════════════════════════════════════════════════
+const ENTRA_SCENARIOS = [
+  {
+    text: "A user in the Marketing department signs in to Microsoft Teams and immediately has access to SharePoint, Outlook, and the company's HR portal — all without entering another password.",
+    correct: 'sso',
+    opts: [{v:'auth',l:'Authentication'},{v:'access',l:'Access Control'},{v:'condacc',l:'Conditional Access'},{v:'sso',l:'Single Sign-On (SSO)'}],
+    explain: "Single Sign-On (SSO) means one login works across all connected services. No separate passwords per service.",
+  },
+  {
+    text: "An IT administrator configures a rule that blocks access to company email from any device that does not have encryption enabled.",
+    correct: 'condacc',
+    opts: [{v:'auth',l:'Authentication'},{v:'access',l:'Access Control'},{v:'condacc',l:'Conditional Access'},{v:'sso',l:'Single Sign-On (SSO)'}],
+    explain: "Conditional Access adds conditions to sign-in. Requiring encryption is a device compliance condition enforced at sign-in.",
+  },
+  {
+    text: "A contractor signs in to a Microsoft 365 account using her fingerprint instead of a password.",
+    correct: 'auth',
+    opts: [{v:'auth',l:'Authentication'},{v:'access',l:'Access Control'},{v:'condacc',l:'Conditional Access'},{v:'sso',l:'Single Sign-On (SSO)'}],
+    explain: "Authentication is the process of verifying identity at sign-in. Biometric methods like fingerprint are authentication methods.",
+  },
+  {
+    text: "An IT administrator sets up a policy that allows Finance department users to access the payroll system, but prevents all other employees from reaching it.",
+    correct: 'access',
+    opts: [{v:'auth',l:'Authentication'},{v:'access',l:'Access Control'},{v:'condacc',l:'Conditional Access'},{v:'sso',l:'Single Sign-On (SSO)'}],
+    explain: "Access Control determines what resources a user can reach after authenticating. Restricting the payroll app to Finance is access control.",
+  },
+  {
+    text: "An employee signing in from an unfamiliar country is prompted to approve a notification on her phone before access is granted.",
+    correct: 'condacc',
+    opts: [{v:'auth',l:'Authentication'},{v:'access',l:'Access Control'},{v:'condacc',l:'Conditional Access'},{v:'sso',l:'Single Sign-On (SSO)'}],
+    explain: "Conditional Access triggered the extra verification step based on the sign-in location being unusual. This is a classic Conditional Access scenario.",
+  },
+];
+
+let entraAnswered = {};
+
+function initEntra() {
+  entraAnswered = {};
+  ST.entraCorrect = 0;
+  renderEntra();
+}
+
+function renderEntra() {
+  const c = document.getElementById('entra-scenarios');
+  c.innerHTML = '';
+  ENTRA_SCENARIOS.forEach((s,i) => {
+    const ans = entraAnswered[i];
+    const div = document.createElement('div');
+    div.style.marginBottom = '18px';
+    div.innerHTML = `<div class="scenario-card">${i+1}. ${s.text}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${s.opts.map(o => `<button class="opt-btn" style="width:auto;padding:8px 14px"
+          onclick="ansEntra(${i},'${o.v}')"
+          ${ans?'disabled':''}
+          style="${ans&&o.v===s.correct?'border-color:var(--green);color:var(--green);background:rgba(57,211,83,.08)':ans&&ans===o.v&&o.v!==s.correct?'border-color:var(--red);color:var(--red);background:rgba(255,107,107,.08)':''}"
+        >${o.l}</button>`).join('')}
+      </div>
+      ${ans?`<div class="fb ${ans===s.correct?'correct':'wrong'}">${ans===s.correct?'&#x2713;':'&#x2717;'} ${s.explain}</div>`:''}`;
+    c.appendChild(div);
+  });
+  const done = Object.keys(entraAnswered).length;
+  document.getElementById('entra-score').textContent = `Answered: ${done} / ${ENTRA_SCENARIOS.length}  |  Correct: ${ST.entraCorrect} / ${ENTRA_SCENARIOS.length}`;
+  if (done === ENTRA_SCENARIOS.length) document.getElementById('entra-complete').style.display = 'flex';
+}
+
+function ansEntra(i, choice) {
+  if (entraAnswered[i]) return;
+  entraAnswered[i] = choice;
+  if (choice === ENTRA_SCENARIOS[i].correct) ST.entraCorrect++;
+  renderEntra();
+}
+
+// ══════════════════════════════════════════════════
+// SECTION 3 — INTUNE TASK MATCHER
+// ══════════════════════════════════════════════════
+const MATCH_TASKS = [
+  {task: "Push a company Wi-Fi password to all enrolled laptops without touching each one.", correct: "Configuration profile"},
+  {task: "Require that all managed devices run Windows 11 23H2 or later before accessing company email.", correct: "Compliance policy"},
+  {task: "Remotely erase all data from a laptop reported stolen by an employee.", correct: "Remote action (Wipe)"},
+  {task: "Control the rollout of the latest Windows Update to pilot devices first, then all users two weeks later.", correct: "Update ring"},
+  {task: "Make the Microsoft Teams app automatically install on every new enrolled device.", correct: "App deployment"},
+  {task: "Register a new employee's iPhone so Intune can manage it.", correct: "Device enrollment"},
+];
+const MATCH_OPTIONS = ["Configuration profile","Compliance policy","Remote action (Wipe)","Update ring","App deployment","Device enrollment"];
+let matchChecked = false;
+
+function initMatch() {
+  matchChecked = false;
+  ST.matchCorrect = 0;
+  renderMatch();
+}
+
+function renderMatch() {
+  const c = document.getElementById('match-rows');
+  c.innerHTML = '';
+  MATCH_TASKS.forEach((t,i) => {
+    const row = document.createElement('div');
+    row.className = 'match-row';
+    row.innerHTML = `
+      <div class="match-task">${t.task}</div>
+      <div class="match-arrow">&#x2192;</div>
+      <select class="match-select" id="ms-${i}" ${matchChecked?'disabled':''}>
+        <option value="">-- select feature --</option>
+        ${MATCH_OPTIONS.map(o=>`<option value="${o}">${o}</option>`).join('')}
+      </select>`;
+    c.appendChild(row);
+  });
+}
+
+function checkMatch() {
+  if (matchChecked) return;
+  matchChecked = true;
+  let correct = 0;
+  MATCH_TASKS.forEach((t,i) => {
+    const sel = document.getElementById('ms-'+i);
+    sel.disabled = true;
+    if (sel.value === t.correct) { sel.classList.add('correct'); correct++; }
+    else { sel.classList.add('wrong'); sel.parentElement.querySelector('.match-task').style.borderColor='var(--red)'; }
+  });
+  ST.matchCorrect = correct;
+  const fb = document.getElementById('match-fb');
+  if (correct === MATCH_TASKS.length) {
+    fb.className = 'fb';
+    document.getElementById('match-complete').style.display = 'flex';
+  } else {
+    fb.textContent = `${correct} of ${MATCH_TASKS.length} correct. Incorrect items are highlighted in red.`;
+    fb.className = 'fb wrong';
+    // show a retry button
+    const retry = document.createElement('button');
+    retry.className = 'btn btn-ghost';
+    retry.style.marginTop = '8px';
+    retry.style.fontSize = '12px';
+    retry.textContent = '\u21BA Try Again';
+    retry.onclick = () => { matchChecked=false; ST.matchCorrect=0; renderMatch(); document.getElementById('match-fb').className='fb'; retry.remove(); };
+    fb.after(retry);
+  }
+}
+
+// ══════════════════════════════════════════════════
+// SECTION 4 — ENDPOINT MODEL DECISION TREE
+// ══════════════════════════════════════════════════
+const MODEL_SCENARIOS = [
+  {
+    text: "A startup of 20 employees has no existing IT infrastructure. All employees work remotely and use new Windows 11 laptops. The company wants minimal server maintenance.",
+    correct: 'cloud',
+    explain: "Cloud-managed (Intune) is ideal here. No existing infrastructure, remote workforce, and a desire to avoid server maintenance all point to the cloud model.",
+  },
+  {
+    text: "A 2,000-person manufacturing company has Windows 7 PCs on a local network, a complex on-premises Active Directory, and strict requirements to keep machinery-connected computers offline.",
+    correct: 'local',
+    explain: "Locally-managed fits better. Legacy hardware, on-premises AD, and offline/isolated systems are hallmarks of the locally-managed model.",
+  },
+  {
+    text: "A consulting firm has 500 employees who travel internationally and need access to company apps from any location without VPN complexity.",
+    correct: 'cloud',
+    explain: "Cloud-managed via Intune and Entra ID removes the VPN requirement. Employees can sign in from anywhere and get full access.",
+  },
+  {
+    text: "A school district is migrating from on-premises AD to Entra ID but still has older computers that must receive Group Policy from the domain during the transition.",
+    correct: 'hybrid',
+    explain: "This is a hybrid scenario. The district needs both on-premises Group Policy for legacy machines AND Entra ID for the migration path. Hybrid Entra Joined devices support both.",
+  },
+  {
+    text: "A hospital requires that all patient-care devices stay on the local network and never connect to the public internet for security reasons.",
+    correct: 'local',
+    explain: "Locally-managed is the right fit. Air-gapped or network-isolated environments cannot use cloud management, which requires internet connectivity.",
+  },
+];
+let modelAnswered = {};
+
+function initModel() {
+  modelAnswered = {};
+  ST.modelCorrect = 0;
+  renderModel();
+}
+
+function renderModel() {
+  const c = document.getElementById('model-scenarios');
+  c.innerHTML = '';
+  MODEL_SCENARIOS.forEach((s,i) => {
+    const ans = modelAnswered[i];
+    const opts = [
+      {v:'local', l:'Locally-Managed'},
+      {v:'cloud', l:'Cloud-Managed (Intune)'},
+      {v:'hybrid', l:'Hybrid'},
+    ];
+    const div = document.createElement('div');
+    div.style.marginBottom = '18px';
+    div.innerHTML = `<div class="scenario-card">${i+1}. ${s.text}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${opts.map(o => `<button class="opt-btn" style="width:auto;padding:8px 16px"
+          onclick="ansModel(${i},'${o.v}')"
+          ${ans?'disabled':''}
+        >${o.l}</button>`).join('')}
+      </div>
+      ${ans?`<div class="fb ${ans===s.correct?'correct':'wrong'}">${ans===s.correct?'&#x2713;':'&#x2717;'} ${s.explain}</div>`:''}`;
+    c.appendChild(div);
+  });
+  const done = Object.keys(modelAnswered).length;
+  document.getElementById('model-score').textContent = `Answered: ${done} / ${MODEL_SCENARIOS.length}  |  Correct: ${ST.modelCorrect} / ${MODEL_SCENARIOS.length}`;
+  if (done === MODEL_SCENARIOS.length) document.getElementById('model-complete').style.display = 'flex';
+}
+
+function ansModel(i, choice) {
+  if (modelAnswered[i]) return;
+  modelAnswered[i] = choice;
+  if (choice === MODEL_SCENARIOS[i].correct) ST.modelCorrect++;
+  renderModel();
+}
+
+// ══════════════════════════════════════════════════
+// SECTION 5A — JOIN TYPE IDENTIFIER
+// ══════════════════════════════════════════════════
+const JT_SCENARIOS = [
+  {
+    text: "A cloud-native startup enrolls all new Windows 11 laptops. Devices authenticate employees via Microsoft 365 accounts only. There is no on-premises domain.",
+    correct: 'entra',
+    opts: ['Entra Joined','Entra Registered','Hybrid Entra Joined'],
+    explain: "Entra Joined. The device is connected only to Entra ID with no on-premises domain involved. This is the cloud-native model.",
+  },
+  {
+    text: "An employee registers her personal MacBook so she can access company email and Teams. The company does not install management profiles on personal devices.",
+    correct: 'registered',
+    opts: ['Entra Joined','Entra Registered','Hybrid Entra Joined'],
+    explain: "Entra Registered. Personal or BYOD devices get a lightweight Entra ID relationship without full company management control.",
+  },
+  {
+    text: "A large university is halfway through a migration from their on-premises Active Directory to Entra ID. Older lab computers still need Group Policy while newer faculty laptops are managed in Intune.",
+    correct: 'hybrid',
+    opts: ['Entra Joined','Entra Registered','Hybrid Entra Joined'],
+    explain: "Hybrid Entra Joined. The devices are connected to both on-premises AD (for Group Policy) and Entra ID (for cloud services). This is the transition state.",
+  },
+  {
+    text: "A company issues new Windows 11 devices that sign in with Microsoft 365 work accounts. Intune manages them fully. No domain controller exists.",
+    correct: 'entra',
+    opts: ['Entra Joined','Entra Registered','Hybrid Entra Joined'],
+    explain: "Entra Joined. Fully cloud-managed, Microsoft 365 sign-in only, no domain controller. The device is Entra Joined.",
+  },
+];
+let jtAnswered = {};
+
+function initJT() {
+  jtAnswered = {};
+  ST.jtCorrect = 0;
+  renderJT();
+}
+
+function renderJT() {
+  const c = document.getElementById('jt-scenarios');
+  c.innerHTML = '';
+  JT_SCENARIOS.forEach((s,i) => {
+    const ans = jtAnswered[i];
+    const div = document.createElement('div');
+    div.style.marginBottom = '16px';
+    div.innerHTML = `<div class="scenario-card">${i+1}. ${s.text}</div>
+      <div class="jt-grid">
+        ${s.opts.map(o => {
+          const v = o.toLowerCase().replace('entra joined','entra').replace('entra registered','registered').replace('hybrid entra joined','hybrid');
+          let cls = 'jt-card';
+          if (ans) cls += v===s.correct?' correct':ans===v?' wrong':'';
+          return `<div class="${cls}" onclick="${ans?'':''}" id="jtc-${i}-${v}" style="${ans?'cursor:default':'cursor:pointer'}" ${ans?'':''}>
+            <div class="jt-name">${o}</div>
+            <div class="jt-desc">${v==='entra'?'Cloud-only, no on-prem':v==='registered'?'Lightweight / BYOD':'Both AD and Entra ID'}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      ${ans?`<div class="fb ${ans===s.correct?'correct':'wrong'}">${ans===s.correct?'&#x2713;':'&#x2717;'} ${s.explain}</div>`:''}`;
+    // Add click handlers after render
+    setTimeout(() => {
+      if (!ans) {
+        s.opts.forEach(o => {
+          const v = o.toLowerCase().replace('entra joined','entra').replace('entra registered','registered').replace('hybrid entra joined','hybrid');
+          const el = document.getElementById(`jtc-${i}-${v}`);
+          if (el) el.onclick = () => ansJT(i, v);
+        });
+      }
+    }, 0);
+    c.appendChild(div);
+  });
+  const done = Object.keys(jtAnswered).length;
+  document.getElementById('jt-score').textContent = `Answered: ${done} / ${JT_SCENARIOS.length}  |  Correct: ${ST.jtCorrect} / ${JT_SCENARIOS.length}`;
+  if (done === JT_SCENARIOS.length) document.getElementById('jt-complete').style.display = 'flex';
+}
+
+function ansJT(i, choice) {
+  if (jtAnswered[i]) return;
+  jtAnswered[i] = choice;
+  if (choice === JT_SCENARIOS[i].correct) ST.jtCorrect++;
+  renderJT();
+}
+
+// ══════════════════════════════════════════════════
+// SECTION 5B — AUTOPILOT SEQUENCE
+// ══════════════════════════════════════════════════
+const SEQ_STEPS = [
+  {id:'a', text:"IT pre-registers the device's hardware ID with Microsoft Entra ID before shipping."},
+  {id:'b', text:"Device ships directly to the employee. IT does not configure it first."},
+  {id:'c', text:"Employee opens the box, powers on the device, and connects to Wi-Fi."},
+  {id:'d', text:"Employee signs in with their Microsoft 365 work account."},
+  {id:'e', text:"Autopilot Entra-joins the device and enrolls it in Intune automatically."},
+  {id:'f', text:"Intune pushes all configuration profiles, compliance policies, and required apps."},
+];
+const SEQ_CORRECT = ['a','b','c','d','e','f'];
+let seqPlaced = [];
+
+function initSeq() {
+  seqPlaced = [];
+  renderSeq();
+}
+
+function renderSeq() {
+  const pool = document.getElementById('seq-pool');
+  const slots = document.getElementById('seq-slots');
+  pool.innerHTML = '';
+  slots.innerHTML = '';
+
+  SEQ_STEPS.forEach(step => {
+    if (seqPlaced.includes(step.id)) return;
+    const el = document.createElement('div');
+    el.className = 'seq-step';
+    el.innerHTML = `<div style="font-family:var(--mono);font-size:11px;color:var(--indL);flex-shrink:0">&#x25B6;</div>${step.text}`;
+    el.onclick = () => {
+      if (seqPlaced.length >= SEQ_STEPS.length) return;
+      seqPlaced.push(step.id);
+      el.classList.add('placed');
+      renderSeq();
+    };
+    pool.appendChild(el);
+  });
+
+  for (let i = 0; i < SEQ_STEPS.length; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'seq-slot' + (seqPlaced[i] ? ' filled' : '');
+    const step = seqPlaced[i] ? SEQ_STEPS.find(s => s.id === seqPlaced[i]) : null;
+    slot.innerHTML = `<span class="seq-slot-num">${i+1}.</span>${step ? step.text : '<span style="color:var(--border)">click a step to place it here</span>'}`;
+    if (step) {
+      slot.style.cursor = 'pointer';
+      slot.title = 'Click to remove';
+      slot.onclick = () => {
+        seqPlaced.splice(i, 1);
+        renderSeq();
+        document.getElementById('seq-fb').className = 'fb';
+        document.getElementById('seq-complete').style.display = 'none';
+      };
+    }
+    slots.appendChild(slot);
+  }
+}
+
+function checkSeq() {
+  if (seqPlaced.length < SEQ_STEPS.length) {
+    const fb = document.getElementById('seq-fb');
+    fb.textContent = 'Place all six steps before checking.';
+    fb.className = 'fb wrong';
+    return;
+  }
+  const correct = seqPlaced.every((id, i) => id === SEQ_CORRECT[i]);
+  const slots = document.querySelectorAll('.seq-slot');
+  slots.forEach((slot, i) => {
+    slot.classList.remove('correct','wrong');
+    slot.classList.add(seqPlaced[i] === SEQ_CORRECT[i] ? 'correct' : 'wrong');
+  });
+  const fb = document.getElementById('seq-fb');
+  if (correct) {
+    ST.seqDone = true;
+    document.getElementById('seq-complete').style.display = 'flex';
+    fb.className = 'fb';
+  } else {
+    fb.textContent = 'Not quite. Steps shown in red are out of order. Click any placed step to remove it and try again.';
+    fb.className = 'fb wrong';
+  }
+}
+
+function resetSeq() {
+  seqPlaced = [];
+  ST.seqDone = false;
+  renderSeq();
+  document.getElementById('seq-fb').className = 'fb';
+  document.getElementById('seq-complete').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════
+// SUMMARY
+// ══════════════════════════════════════════════════
+function updateSummary() {
+  document.getElementById('sum-sort').textContent = ST.sortCorrect+' / '+SERVICES.length;
+  document.getElementById('sum-entra').textContent = ST.entraCorrect+' / '+ENTRA_SCENARIOS.length;
+  document.getElementById('sum-match').textContent = ST.matchCorrect+' / '+MATCH_TASKS.length;
+  document.getElementById('sum-model').textContent = ST.modelCorrect+' / '+MODEL_SCENARIOS.length;
+}
+
+// ── INIT ────────────────────────────────────────────────────────────────────
+updateNav();
+setTimeout(() => typeIn('t0', TERMS[0]), 400);
+</script>
+</body>
+</html>

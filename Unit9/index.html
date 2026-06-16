@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOS130 Unit 9 - The Triage Desk</title>
+<style>
+:root{
+  --bg:#0B1020; --panel:#121A33; --panel2:#0F172A; --line:#24304F;
+  --gy:#64748B; --gy-dk:#475569; --gy-soft:#94A3B8; --gy-bright:#CBD5E1;
+  --txt:#E2E8F0; --mut:#94A3B8; --grn:#4ADE80; --red:#F87171; --gold:#FBBF24;
+  --mono:'Consolas','Courier New',monospace; --sans:'Segoe UI',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.6;padding-bottom:60px}
+.wrap{max-width:980px;margin:0 auto;padding:0 18px}
+header{border-bottom:2px solid var(--gy-dk);padding:26px 0 18px;background:linear-gradient(180deg,#11182E,var(--bg))}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:3px;color:var(--gy-soft)}
+h1{font-size:30px;margin-top:6px}
+h1 .accent{color:var(--gy-bright)}
+.sub{color:var(--mut);margin-top:6px;font-size:15px}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
+nav button{background:var(--panel);border:1px solid var(--line);color:var(--mut);padding:8px 14px;border-radius:6px;cursor:pointer;font-family:var(--mono);font-size:12.5px}
+nav button.active{background:var(--gy-dk);border-color:var(--gy);color:#fff}
+section{display:none;animation:fade .25s}
+section.show{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h2{font-size:22px;margin:18px 0 10px;color:#fff}
+h2 .num{color:var(--gy-bright);font-family:var(--mono);margin-right:8px}
+h3{font-size:16px;color:var(--gy-bright);margin:16px 0 8px}
+p{margin:0 0 12px;color:var(--txt)}
+p.mut{color:var(--mut)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:14px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;background:#1E293B;border:1px solid var(--line);color:var(--gy-bright);padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+.btn{background:var(--gy-dk);border:1px solid var(--gy);color:#fff;padding:9px 16px;border-radius:6px;cursor:pointer;font-size:14px;font-family:var(--sans)}
+.btn:hover{background:var(--gy)}
+.pill-row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.pill{background:#1E293B;border:1px solid var(--line);color:var(--txt);padding:6px 12px;border-radius:20px;cursor:pointer;font-size:13px}
+.pill:hover{border-color:var(--gy)}
+.pill.sel{background:var(--gy-dk);border-color:var(--gy-bright);color:#fff}
+.pill.right{background:#14532D;border-color:var(--grn);color:var(--grn)}
+.pill.wrong{background:#450A0A;border-color:var(--red);color:var(--red)}
+.evtlog{background:#05080F;border:1px solid var(--line);border-radius:10px;max-height:300px;overflow-y:auto;margin:10px 0}
+.evt{display:flex;gap:10px;padding:7px 12px;border-bottom:1px solid #131B30;font-family:var(--mono);font-size:12px;cursor:pointer;align-items:baseline}
+.evt:hover{background:#0E1730}
+.evt .lvl{width:74px;flex-shrink:0;font-weight:700}
+.evt .lvl.Info{color:var(--mut)} .evt .lvl.Warning{color:var(--gold)} .evt .lvl.Error{color:var(--red)} .evt .lvl.Critical{color:#FB7185}
+.evt .time{width:64px;flex-shrink:0;color:var(--gy-soft)}
+.evt .eid{width:52px;flex-shrink:0;color:var(--gy-bright)}
+.evt .msg{color:var(--txt)}
+.evt.culprit-found{background:#0C2A1B;border-left:3px solid var(--grn)}
+.filterbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+.filterbar .lbl{font-family:var(--mono);font-size:11px;color:var(--mut);letter-spacing:1px;margin-right:4px}
+.count{font-family:var(--mono);font-size:12px;color:var(--gy-soft);margin:4px 0}
+.reli{display:flex;gap:8px;align-items:flex-end;height:140px;padding:14px;background:#05080F;border:1px solid var(--line);border-radius:10px;margin:10px 0}
+.reli .day{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
+.reli .bar{width:100%;background:var(--gy-dk);border-radius:4px 4px 0 0;transition:background .2s}
+.reli .day:hover .bar{background:var(--gy)}
+.reli .mark{font-size:13px;height:18px}
+.reli .dlbl{font-family:var(--mono);font-size:10px;color:var(--mut)}
+.stepper{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.step-card{flex:1;min-width:180px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;opacity:.35;transition:opacity .3s}
+.step-card.on{opacity:1;border-color:var(--gy)}
+.step-card .n{display:inline-flex;width:26px;height:26px;border-radius:50%;background:var(--gy-dk);align-items:center;justify-content:center;font-weight:700;font-size:13px;margin-bottom:6px}
+.step-card h4{font-size:14px;margin-bottom:4px}
+.step-card p{font-size:12.5px;color:var(--mut);margin:0}
+.term{background:#05080F;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:14px 0}
+.term-bar{display:flex;align-items:center;gap:6px;background:#0D1426;padding:8px 12px;border-bottom:1px solid var(--line)}
+.dot{width:10px;height:10px;border-radius:50%}
+.d1{background:#F87171}.d2{background:#FBBF24}.d3{background:#34D399}
+.term-title{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-left:8px}
+.term-out{font-family:var(--mono);font-size:13px;padding:12px 14px;min-height:80px;max-height:280px;overflow-y:auto;white-space:pre-wrap}
+.term-out .cmd{color:var(--grn)}
+.term-out .dim{color:var(--mut)}
+.term-out .err{color:var(--red)}
+.term-out .ok{color:var(--grn)}
+.keyprompt{background:#0A2540;border:2px solid #1D4ED8;border-radius:10px;padding:18px;margin:12px 0;display:none}
+.keyprompt.show{display:block}
+.keyprompt h4{color:#93C5FD;font-size:15px;margin-bottom:8px}
+.outcome{border-radius:10px;padding:14px 16px;margin:10px 0;font-size:14.5px;display:none}
+.outcome.show{display:block}
+.outcome.bad{background:#2A0E0E;border:1px solid var(--red);color:#FECACA}
+.outcome.good{background:#0C2A1B;border:1px solid var(--grn);color:#BBF7D0}
+.quiz-q{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0}
+.quiz-q .qt{font-weight:600;margin-bottom:10px}
+.opt{display:block;width:100%;text-align:left;background:#0F172A;border:1px solid var(--line);color:var(--txt);padding:9px 12px;border-radius:6px;margin:6px 0;cursor:pointer;font-size:14px}
+.opt:hover{border-color:var(--gy)}
+.opt.right{border-color:var(--grn);background:#0C2A1B;color:var(--grn)}
+.opt.wrong{border-color:var(--red);background:#2A0E0E;color:var(--red)}
+.fb{font-size:13px;margin-top:8px;display:none}
+.fb.show{display:block}
+.fb.good{color:var(--grn)} .fb.bad{color:var(--red)}
+.scorebar{position:fixed;bottom:0;left:0;right:0;background:#0D1426;border-top:1px solid var(--line);padding:10px 0;z-index:50}
+.scorebar .wrap{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:13px}
+.scorebar .pts{color:var(--gold)}
+.case-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.badge{font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:4px;letter-spacing:1px}
+.badge.open{background:#3B2204;color:var(--gold);border:1px solid var(--gold)}
+.badge.solved{background:#0C2A1B;color:var(--grn);border:1px solid var(--grn)}
+.evidence{background:#0F172A;border:1px dashed var(--line);border-radius:8px;padding:12px 14px;font-size:13px;margin:10px 0;line-height:1.7}
+.evidence .k{color:var(--gy-soft);font-family:var(--mono);font-size:11.5px}
+.final{background:linear-gradient(135deg,#1B2436,#0F172A);border:1px solid var(--gy-dk);border-radius:12px;padding:22px;text-align:center;margin:16px 0}
+.final .big{font-size:42px;font-weight:800;color:var(--gy-bright)}
+kbd{font-family:var(--mono);background:#1E293B;border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:12.5px;color:var(--gy-bright)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="kicker">NOS130 // UNIT 9 // WEEKS 14-15</div>
+    <h1>The Triage <span class="accent">Desk</span></h1>
+    <div class="sub">Hunt events with filters, run the repair pair in order, pass the tollbooth, and triage four sick machines like the tech on duty.</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav id="nav"></nav>
+
+  <!-- SECTION 1: BRIEFING -->
+  <section id="s0" class="show">
+    <h2><span class="num">01</span>Briefing</h2>
+    <p>Four machines will land on your desk in Section 5, each with a symptom and a folder of evidence. Sections 2 through 4 are the training: the diary room where you practice filtering instead of scrolling, the repair bench where order matters, and the tollbooth you will pass with a key decision. Everything here is risk-free practice for the lab's real versions.</p>
+    <div class="grid2">
+      <div class="card"><div class="tag">YOU WILL PRACTICE</div>
+        <p style="font-size:14px">Filtering an event log down from dozens of entries to the three that matter. Reading a Reliability timeline. The SFC and DISM sequence. Safe Mode verdicts. The BitLocker tollbooth, and why key location decides everything.</p>
+      </div>
+      <div class="card"><div class="tag">HOW SCORING WORKS</div>
+        <p style="font-size:14px">Triage Cases: 8 points (4 machines, diagnosis + next move each). Knowledge Check: 8 points. 16 total, tracked below. 13 or better is on-call grade. Sections 2 through 4 are unscored; experiment freely.</p>
+      </div>
+    </div>
+    <button class="btn" onclick="go(1)">Start: The Diary Room &rarr;</button>
+  </section>
+
+  <!-- SECTION 2: DIARY ROOM -->
+  <section id="s1">
+    <h2><span class="num">02</span>The Diary Room</h2>
+    <p><strong>The ticket:</strong> "Apps started crashing around 2:14 PM." Below is the System log: 24 events from today. Your job: find the culprit and click it. Scroll if you want to suffer, or use the filters like a professional.</p>
+    <div class="card">
+      <div class="filterbar">
+        <span class="lbl">TIME</span>
+        <button class="pill sel" onclick="setTimeF(0,this)">All day</button>
+        <button class="pill" onclick="setTimeF(1,this)">2:00 - 2:30 PM</button>
+        <button class="pill" onclick="setTimeF(2,this)">2:10 - 2:18 PM</button>
+      </div>
+      <div class="filterbar">
+        <span class="lbl">LEVEL</span>
+        <button class="pill sel" id="lvlInfo" onclick="toggleLvl('Info',this)">Info</button>
+        <button class="pill sel" id="lvlWarning" onclick="toggleLvl('Warning',this)">Warning</button>
+        <button class="pill sel" id="lvlError" onclick="toggleLvl('Error',this)">Error</button>
+        <button class="pill sel" id="lvlCritical" onclick="toggleLvl('Critical',this)">Critical</button>
+      </div>
+      <div class="count" id="evtCount"></div>
+      <div class="evtlog" id="evtlog"></div>
+      <div class="fb" id="diaryFb"></div>
+    </div>
+    <h3>Reliability Monitor: the same day, drawn</h3>
+    <p class="mut" style="font-size:13.5px">Seven days of this machine. Click the day that explains everything.</p>
+    <div class="reli" id="reli"></div>
+    <div class="fb" id="reliFb"></div>
+    <button class="btn" onclick="go(2)">Next: The Repair Bench &rarr;</button>
+  </section>
+
+  <!-- SECTION 3: REPAIR BENCH -->
+  <section id="s2">
+    <h2><span class="num">03</span>The Repair Bench</h2>
+    <p>A machine reports possible system file damage. Run the repair sequence by clicking the right next move at each step. Wrong moves bounce, with reasons.</p>
+    <div class="card">
+      <div class="tag" id="benchTag">STEP 1</div>
+      <p style="font-weight:600" id="benchPrompt">The machine misbehaves in ways that smell like damaged system files. First move?</p>
+      <div class="pill-row" id="benchMoves"></div>
+      <div class="term"><div class="term-bar"><div class="dot d1"></div><div class="dot d2"></div><div class="dot d3"></div><span class="term-title">Administrator: Terminal</span></div>
+        <div class="term-out" id="benchOut"><span class="dim">Choose the first move.</span></div>
+      </div>
+      <button class="btn" onclick="benchReset()">Reset the bench</button>
+    </div>
+    <button class="btn" onclick="go(3)">Next: Safe Mode and the Tollbooth &rarr;</button>
+  </section>
+
+  <!-- SECTION 4: SAFE MODE + TOLLBOOTH -->
+  <section id="s3">
+    <h2><span class="num">04</span>Safe Mode Logic, Then the Tollbooth</h2>
+    <div class="card">
+      <div class="tag">THE ISOLATION CHAMBER</div>
+      <p style="font-size:14px">A machine misbehaves. You boot it into Safe Mode. Click a result, then pick what it tells you.</p>
+      <div class="pill-row">
+        <button class="pill" onclick="safeResult(0,this)">Problem is GONE in Safe Mode</button>
+        <button class="pill" onclick="safeResult(1,this)">Problem PERSISTS in Safe Mode</button>
+      </div>
+      <div class="pill-row" id="safeAnswers" style="display:none"></div>
+      <div class="fb" id="safeFb"></div>
+    </div>
+    <div class="card">
+      <div class="tag">THE TOLLBOOTH</div>
+      <p style="font-size:14px">This machine will not boot: three failures, and WinRE has opened on its own. The drive is BitLocker encrypted. Walk the recovery.</p>
+      <button class="btn" onclick="runTollbooth()">Enter WinRE &rarr;</button>
+      <div class="stepper">
+        <div class="step-card" id="tb0"><span class="n">1</span><h4>WinRE loads</h4><p>The tiny second OS boots from its own partition. Windows itself never starts.</p></div>
+        <div class="step-card" id="tb1"><span class="n">2</span><h4>Repair tool reaches for C:</h4><p>Startup Repair needs to read the drive to fix it.</p></div>
+        <div class="step-card" id="tb2"><span class="n">3</span><h4>The TPM refuses to vouch</h4><p>This is not a verified boot of YOUR Windows. No key is released.</p></div>
+      </div>
+      <div class="keyprompt" id="keyprompt">
+        <h4>BitLocker recovery</h4>
+        <p style="font-size:13.5px;color:#BFDBFE">Enter the recovery key for this drive (Key ID: 7C3A-88F1). Where is yours?</p>
+        <div class="pill-row">
+          <button class="pill" onclick="keyChoice(0,this)">In a file on this C: drive</button>
+          <button class="pill" onclick="keyChoice(1,this)">Microsoft account, from my phone</button>
+          <button class="pill" onclick="keyChoice(2,this)">Host share (KeyVault)</button>
+          <button class="pill" onclick="keyChoice(3,this)">I never saved it</button>
+        </div>
+      </div>
+      <div class="outcome bad" id="tbBad"></div>
+      <div class="outcome good" id="tbGood"><strong>KEY ACCEPTED.</strong> Forty-eight digits, thirty seconds, and Startup Repair proceeds against a drive that stayed protected the entire time. Recovery day arrived, and the Unit 7 decision answered it. That is the whole reason the lab graded WHERE the key lived.</div>
+    </div>
+    <button class="btn" onclick="go(4)">Next: Triage Cases &rarr;</button>
+  </section>
+
+  <!-- SECTION 5: TRIAGE CASES -->
+  <section id="s4">
+    <h2><span class="num">05</span>Triage Cases</h2>
+    <p>Four machines, four folders of evidence. Read everything: the symptom and the evidence together point at one diagnosis, and the diagnosis picks the next move. Two points per case.</p>
+    <div id="cases"></div>
+    <button class="btn" onclick="go(5)">Next: Knowledge Check &rarr;</button>
+  </section>
+
+  <!-- SECTION 6: KNOWLEDGE CHECK -->
+  <section id="s5">
+    <h2><span class="num">06</span>Knowledge Check</h2>
+    <p>Eight questions, one point each. Instant feedback.</p>
+    <div id="quiz"></div>
+    <div class="final" id="finalBox" style="display:none">
+      <div class="tag">FINAL REPORT</div>
+      <div class="big" id="finalScore">0 / 16</div>
+      <p id="finalMsg" style="margin-top:8px"></p>
+      <p class="mut" style="font-size:13px;margin-top:6px">Reload the page to retry. The lab stages all of this on your real VM, with your real key.</p>
+    </div>
+  </section>
+</div>
+
+<div class="scorebar"><div class="wrap"><span>NOS130 UNIT 9 // TRIAGE DESK</span><span class="pts" id="scoreLive">SCORE: 0 / 16</span></div></div>
+
+<script>
+// ===== STATE =====
+var score = { cases: {}, quiz: {}, total: function(){ var t=0,k; for(k in this.cases) t+=this.cases[k]; for(k in this.quiz) t+=this.quiz[k]; return t; } };
+function updScore(){ document.getElementById('scoreLive').textContent = 'SCORE: ' + score.total() + ' / 16'; }
+
+// ===== NAV =====
+var SECTIONS = ['Briefing','Diary Room','Repair Bench','Safe Mode + Tollbooth','Triage Cases','Knowledge Check'];
+var nav = document.getElementById('nav');
+SECTIONS.forEach(function(name, i){
+  var b = document.createElement('button');
+  b.textContent = (i+1) + '. ' + name;
+  b.id = 'nav' + i;
+  b.onclick = function(){ go(i); };
+  nav.appendChild(b);
+});
+function go(i){
+  for (var j=0;j<6;j++){
+    document.getElementById('s'+j).classList.toggle('show', j===i);
+    document.getElementById('nav'+j).classList.toggle('active', j===i);
+  }
+  window.scrollTo(0,0);
+}
+go(0);
+
+// ===== SECTION 2: DIARY ROOM =====
+// times as minutes since midnight; ticket: apps crashing ~14:14 (854)
+var EVENTS = [
+  { t: 422, lvl:'Info', id:'7036', msg:'The Print Spooler service entered the running state.' },
+  { t: 423, lvl:'Info', id:'6013', msg:'The system uptime is 86400 seconds.' },
+  { t: 455, lvl:'Info', id:'7036', msg:'The Windows Update service entered the running state.' },
+  { t: 470, lvl:'Warning', id:'1014', msg:'Name resolution for wpad timed out.' },
+  { t: 502, lvl:'Info', id:'7040', msg:'The start type of BITS was changed from demand to auto.' },
+  { t: 533, lvl:'Info', id:'7036', msg:'The Software Protection service entered the stopped state.' },
+  { t: 600, lvl:'Error', id:'10016', msg:'DCOM permission settings do not grant Local Activation (harmless, famous).' },
+  { t: 645, lvl:'Info', id:'7036', msg:'The Device Setup Manager service entered the running state.' },
+  { t: 702, lvl:'Warning', id:'4101', msg:'Display driver recovered from timeout.' },
+  { t: 760, lvl:'Info', id:'7036', msg:'The WinHTTP Proxy service entered the stopped state.' },
+  { t: 781, lvl:'Info', id:'16', msg:'The access history in hive was cleared.' },
+  { t: 808, lvl:'Info', id:'7036', msg:'The CNG Key Isolation service entered the running state.' },
+  { t: 829, lvl:'Info', id:'6013', msg:'The system uptime is 99000 seconds.' },
+  { t: 846, lvl:'Info', id:'7045', msg:'A service was installed: AcmeSync Helper.' },
+  { t: 853, lvl:'Warning', id:'1530', msg:'Windows detected your registry file is still in use.' },
+  { t: 854, lvl:'Error', id:'7034', msg:'The AcmeSync Helper service terminated unexpectedly. 1 time(s).', culprit:true },
+  { t: 855, lvl:'Error', id:'1000', msg:'Faulting application OUTLOOK.EXE, faulting module acmehook.dll.', culprit:true },
+  { t: 856, lvl:'Error', id:'1000', msg:'Faulting application EXCEL.EXE, faulting module acmehook.dll.', culprit:true },
+  { t: 871, lvl:'Info', id:'7036', msg:'The Diagnostic Policy service entered the running state.' },
+  { t: 902, lvl:'Info', id:'7036', msg:'The Windows Error Reporting service entered the running state.' },
+  { t: 933, lvl:'Warning', id:'1014', msg:'Name resolution for time.windows.com timed out.' },
+  { t: 980, lvl:'Info', id:'7036', msg:'The Update Orchestrator service entered the running state.' },
+  { t: 1010, lvl:'Error', id:'10016', msg:'DCOM permission settings do not grant Local Activation (again).' },
+  { t: 1042, lvl:'Info', id:'7036', msg:'The Background Intelligent Transfer service entered the stopped state.' },
+];
+function fmtTime(m){
+  var h = Math.floor(m/60), mm = m%60;
+  var ap = h >= 12 ? 'PM' : 'AM';
+  var hh = h % 12; if (hh === 0) hh = 12;
+  return hh + ':' + (mm<10?'0':'') + mm + ' ' + ap;
+}
+var timeF = 0; // 0 all, 1 = 840-870, 2 = 850-858
+var lvlOn = { Info:true, Warning:true, Error:true, Critical:true };
+var diarySolved = false;
+function setTimeF(i, el){
+  timeF = i;
+  var row = el.parentNode.children;
+  for (var j=0;j<row.length;j++) row[j].classList.remove('sel');
+  el.classList.add('sel');
+  renderLog();
+}
+function toggleLvl(lvl, el){
+  lvlOn[lvl] = !lvlOn[lvl];
+  el.classList.toggle('sel', lvlOn[lvl]);
+  renderLog();
+}
+function renderLog(){
+  var log = document.getElementById('evtlog');
+  log.innerHTML = '';
+  var shown = 0;
+  EVENTS.forEach(function(e, i){
+    if (!lvlOn[e.lvl]) return;
+    if (timeF === 1 && (e.t < 840 || e.t > 870)) return;
+    if (timeF === 2 && (e.t < 850 || e.t > 858)) return;
+    shown++;
+    var d = document.createElement('div');
+    d.className = 'evt' + (diarySolved && e.culprit ? ' culprit-found' : '');
+    d.innerHTML = '<span class="lvl ' + e.lvl + '">' + e.lvl + '</span><span class="time">' + fmtTime(e.t) + '</span><span class="eid">' + e.id + '</span><span class="msg">' + e.msg + '</span>';
+    d.onclick = function(){ clickEvt(i); };
+    log.appendChild(d);
+  });
+  document.getElementById('evtCount').textContent = shown + ' of ' + EVENTS.length + ' events shown' + (timeF === 0 && shown > 20 ? ' (this is the haystack; filter it)' : '');
+}
+function clickEvt(i){
+  var e = EVENTS[i];
+  var fb = document.getElementById('diaryFb');
+  if (e.culprit){
+    diarySolved = true;
+    fb.className = 'fb show good';
+    fb.textContent = 'FOUND IT. A new service (AcmeSync Helper, installed 2:06) died at 2:14, and its hook DLL took Outlook and Excel down with it. Three filtered events told the whole story: install, death, casualties. Note what you did not do: scroll.';
+    renderLog();
+  } else if (e.id === '10016'){
+    fb.className = 'fb show bad';
+    fb.textContent = 'The famous DCOM 10016: scary-looking, harmless, and present on nearly every Windows machine on earth. It is the log\u2019s background noise. Check the TIME: the ticket said 2:14.';
+  } else {
+    fb.className = 'fb show bad';
+    fb.textContent = 'Not this one. Match the ticket\u2019s time (around 2:14 PM) and think about what kind of event would crash APPS. Tighten the filters.';
+  }
+}
+renderLog();
+
+// Reliability mini-timeline
+var RELI = [
+  { d:'Thu', score: 9 }, { d:'Fri', score: 9 }, { d:'Sat', score: 10 },
+  { d:'Sun', score: 10 }, { d:'Mon', score: 9, mark:'\u2699', note:'install' },
+  { d:'Tue', score: 4, mark:'\u274C', cliff:true }, { d:'Wed', score: 3, mark:'\u274C' },
+];
+(function buildReli(){
+  var r = document.getElementById('reli');
+  RELI.forEach(function(day, i){
+    var d = document.createElement('div');
+    d.className = 'day';
+    d.innerHTML = '<span class="mark">' + (day.mark || '') + '</span>' +
+      '<div class="bar" style="height:' + (day.score * 9) + 'px"></div>' +
+      '<span class="dlbl">' + day.d + '</span>';
+    d.onclick = function(){
+      var fb = document.getElementById('reliFb');
+      if (day.cliff || (day.mark === '\u274C')){
+        fb.className = 'fb show good';
+        fb.textContent = 'The cliff. Stability 9 to 4 overnight, and look one column left: a gear on Monday. Something was INSTALLED Monday, crashes began Tuesday. Reliability Monitor just answered what changed without you asking anyone. (Detail: Driver update - AcmeSync filter driver, Monday 4:52 PM.)';
+      } else if (day.note === 'install'){
+        fb.className = 'fb show good';
+        fb.textContent = 'Sharp: the install itself, Monday. The score had not fallen YET, which is the trap of reading single days. The gear here plus the cliff after it is the full sentence: cause Monday, effect Tuesday.';
+      } else {
+        fb.className = 'fb show bad';
+        fb.textContent = 'A quiet day. The story lives where the line falls. Find the cliff, then look one column LEFT of it.';
+      }
+    };
+    r.appendChild(d);
+  });
+})();
+
+// ===== SECTION 3: REPAIR BENCH =====
+var benchStep = 0;
+var BENCH = [
+  {
+    prompt: 'The machine misbehaves in ways that smell like damaged system files. First move?',
+    moves: [
+      { t:'sfc /scannow', ok:true },
+      { t:'DISM /RestoreHealth first', ok:false, why:'DISM repairs the reference store. You do not yet know the store is the problem; start with the cheaper, targeted scan.' },
+      { t:'Reset this PC', ok:false, why:'Rung four of the ladder for a rung one situation. Escalate gently.' },
+    ],
+    out: '<span class="cmd">PS&gt; sfc /scannow</span>\nBeginning system scan...\n<span class="err">Windows Resource Protection found corrupt files but was\nunable to fix some of them.</span>\n<span class="dim">(the books are damaged, and so is part of the library)</span>'
+  },
+  {
+    prompt: 'SFC found damage it could not fix. Next move?',
+    moves: [
+      { t:'Run sfc /scannow again', ok:false, why:'Same scan, same reference store, same result. The store it repairs FROM is the broken part; fix that first.' },
+      { t:'DISM /Online /Cleanup-Image /RestoreHealth', ok:true },
+      { t:'Reinstall Windows', ok:false, why:'Still rung four. The repair pair has not finished its work.' },
+    ],
+    out: '<span class="cmd">PS&gt; DISM /Online /Cleanup-Image /RestoreHealth</span>\n[==========================100.0%==========]\n<span class="ok">The restore operation completed successfully.</span>\n<span class="dim">(the reference store is healthy again, pulled from Windows Update)</span>'
+  },
+  {
+    prompt: 'DISM repaired the store. Final move?',
+    moves: [
+      { t:'Done, the machine is fixed', ok:false, why:'DISM fixed the LIBRARY. The damaged books from the first scan are still damaged until SFC runs against the healthy store.' },
+      { t:'sfc /scannow, once more', ok:true },
+    ],
+    out: '<span class="cmd">PS&gt; sfc /scannow</span>\nBeginning system scan...\n<span class="ok">Windows Resource Protection found corrupt files and\nsuccessfully repaired them.</span>\n<span class="dim">(fix the library, then fix the books: SFC, DISM, SFC)</span>'
+  },
+];
+function benchRender(){
+  var done = benchStep >= BENCH.length;
+  document.getElementById('benchTag').textContent = done ? 'SEQUENCE COMPLETE' : 'STEP ' + (benchStep + 1);
+  document.getElementById('benchPrompt').textContent = done ? 'SFC, then DISM, then SFC again. The order is the entire trick, and now your hands know it.' : BENCH[benchStep].prompt;
+  var row = document.getElementById('benchMoves');
+  row.innerHTML = '';
+  if (done) return;
+  BENCH[benchStep].moves.forEach(function(m){
+    var b = document.createElement('button');
+    b.className = 'pill';
+    b.textContent = m.t;
+    b.onclick = function(){
+      var out = document.getElementById('benchOut');
+      if (m.ok){
+        b.classList.add('right');
+        out.innerHTML += (out.textContent.trim() ? '\n\n' : '') + BENCH[benchStep].out;
+        out.scrollTop = out.scrollHeight;
+        benchStep++;
+        setTimeout(benchRender, 900);
+      } else {
+        b.classList.add('wrong');
+        out.innerHTML += (out.textContent.trim() ? '\n\n' : '') + '<span class="err">(' + m.why + ')</span>';
+        out.scrollTop = out.scrollHeight;
+        setTimeout(function(){ b.classList.remove('wrong'); }, 900);
+      }
+    };
+    row.appendChild(b);
+  });
+}
+function benchReset(){
+  benchStep = 0;
+  document.getElementById('benchOut').innerHTML = '<span class="dim">Choose the first move.</span>';
+  benchRender();
+}
+benchRender();
+
+// ===== SECTION 4: SAFE MODE + TOLLBOOTH =====
+var SAFE = [
+  {
+    answers: [
+      { t:'The cause is a third-party driver, service, or startup app', ok:true, why:'Safe Mode did not load it, and the problem left with it. Hunt with msconfig selective startup.' },
+      { t:'The cause is core Windows or hardware', ok:false, why:'Backwards: if core Windows or hardware were sick, Safe Mode would be sick too, because Safe Mode IS core Windows.' },
+      { t:'Nothing; Safe Mode results are random', ok:false, why:'Safe Mode is the half-split made bootable. Its verdict always means something.' },
+    ]
+  },
+  {
+    answers: [
+      { t:'The cause is a third-party driver, service, or startup app', ok:false, why:'Backwards: third-party things never loaded, yet the problem is here anyway. Look deeper.' },
+      { t:'The cause is core Windows or hardware', ok:true, why:'Only the essentials loaded, and the problem survived. SFC, DISM, and the recovery ladder are next.' },
+      { t:'Nothing; Safe Mode results are random', ok:false, why:'Safe Mode is the half-split made bootable. Its verdict always means something.' },
+    ]
+  },
+];
+function safeResult(which, el){
+  var row = el.parentNode.children;
+  for (var j=0;j<row.length;j++) row[j].classList.remove('sel');
+  el.classList.add('sel');
+  var ansRow = document.getElementById('safeAnswers');
+  ansRow.style.display = 'flex';
+  ansRow.innerHTML = '';
+  document.getElementById('safeFb').className = 'fb';
+  SAFE[which].answers.forEach(function(a){
+    var b = document.createElement('button');
+    b.className = 'pill';
+    b.textContent = a.t;
+    b.onclick = function(){
+      var fb = document.getElementById('safeFb');
+      b.classList.add(a.ok ? 'right' : 'wrong');
+      fb.className = 'fb show ' + (a.ok ? 'good' : 'bad');
+      fb.textContent = (a.ok ? 'Correct. ' : '') + a.why;
+      if (!a.ok) setTimeout(function(){ b.classList.remove('wrong'); }, 900);
+    };
+    ansRow.appendChild(b);
+  });
+}
+function runTollbooth(){
+  document.getElementById('tbBad').classList.remove('show');
+  document.getElementById('tbGood').classList.remove('show');
+  document.getElementById('keyprompt').classList.remove('show');
+  for (var j=0;j<3;j++) document.getElementById('tb'+j).classList.remove('on');
+  var i = 0;
+  var t = setInterval(function(){
+    if (i < 3){
+      document.getElementById('tb'+i).classList.add('on');
+      i++;
+    } else {
+      clearInterval(t);
+      document.getElementById('keyprompt').classList.add('show');
+    }
+  }, 600);
+}
+var KEY_OUT = [
+  { good:false, t:'<strong>UNREACHABLE.</strong> The file is on the drive WinRE cannot open without the file. The spare key, locked inside the house: the wizard refused this location in Unit 7, and this screen is the reason. (In this simulation, pick where your key actually lives. On a real machine, this answer ends the story.)' },
+  { good:true, t:'' },
+  { good:true, t:'' },
+  { good:false, t:'<strong>FULL STOP.</strong> No key, no repair, no data: not for you, not for Microsoft support, not for anyone. The drive is mathematically sealed. This is the outcome the lab\u2019s exile rule exists to make impossible for you. Reset the walkthrough and choose a real location.' },
+];
+function keyChoice(i, el){
+  var bad = document.getElementById('tbBad');
+  var good = document.getElementById('tbGood');
+  bad.classList.remove('show');
+  good.classList.remove('show');
+  if (KEY_OUT[i].good){
+    el.classList.add('right');
+    good.classList.add('show');
+  } else {
+    el.classList.add('wrong');
+    bad.innerHTML = KEY_OUT[i].t;
+    bad.classList.add('show');
+    setTimeout(function(){ el.classList.remove('wrong'); }, 1200);
+  }
+}
+
+// ===== SECTION 5: TRIAGE CASES =====
+var DIAGNOSES = [
+  'A recently installed driver or program is destabilizing the system',
+  'Boot failure: repairs must run from WinRE, which needs the recovery key',
+  'File loss: a document is gone; the system itself is healthy',
+  'A third-party startup item, isolated by the Safe Mode verdict',
+  'Damaged system files in Windows itself',
+  'The network adapter has failed',
+];
+var MOVES = [
+  'System Restore to the point before the change',
+  'Confirm the recovery key is in hand, then run Startup Repair in WinRE',
+  'Restore the file from File History or a backup; System Restore will not return it',
+  'Hunt the culprit with msconfig selective startup',
+  'Run SFC, then DISM, then SFC again',
+  'Climb the Unit 6 network ladder from rung 1',
+];
+var CASES = [
+  {
+    id:'A', title:'CASE A: The Tuesday Cliff',
+    sym:'"It has crashed five times since Tuesday. It was perfect last week."',
+    ev:'<span class="k">RELIABILITY:</span> Stability 9 until Monday; gear icon Monday (driver update); red Xs Tuesday and Wednesday.\n<span class="k">RESTORE POINTS:</span> One exists, created automatically Sunday.\n<span class="k">BOOTS:</span> Normally.',
+    diag:0, move:0,
+    debrief:'The timeline is the diagnosis: install Monday, cliff Tuesday. A restore point from Sunday sits before the damage, and System Restore rolls back the driver while leaving files alone. Rung two, precisely aimed.'
+  },
+  {
+    id:'B', title:'CASE B: The Machine That Stopped Booting',
+    sym:'"It just spins and reboots. Third time now, and a blue recovery screen appeared."',
+    ev:'<span class="k">STATE:</span> Three failed boots; WinRE has auto-opened.\n<span class="k">DRIVE:</span> BitLocker encrypted (this is the lab VM\u2019s sibling).\n<span class="k">KEY:</span> Escrowed to the host KeyVault share in Unit 7.',
+    diag:1, move:1,
+    debrief:'Startup Repair is the right tool, but on an encrypted drive the tollbooth comes first. The professional move is key-in-hand BEFORE the repair attempt: thirty seconds of preparation versus a dead end mid-repair. Data safe? Key reachable? Then climb.'
+  },
+  {
+    id:'C', title:'CASE C: The Vanished Thesis',
+    sym:'"I deleted my thesis chapter last week by mistake. Can you roll the computer back to before I deleted it?"',
+    ev:'<span class="k">SYSTEM:</span> Healthy: no crashes, boots fine, Reliability steady at 9.\n<span class="k">RESTORE POINTS:</span> Several exist, including one before the deletion.\n<span class="k">FILE HISTORY:</span> Was enabled to an external drive.',
+    diag:2, move:2,
+    debrief:'The user even proposed the wrong tool by name. System Restore captures SYSTEM state and pointedly not personal files: restoring that point returns zero thesis chapters. File History is the layer built for exactly this loss. Matching the layer to the disaster is the whole skill.'
+  },
+  {
+    id:'D', title:'CASE D: Fine in the Chamber',
+    sym:'"It freezes constantly. Weird thing: the shop booted it in some diagnostic mode and it ran perfectly for an hour."',
+    ev:'<span class="k">SAFE MODE:</span> Problem GONE: an hour clean.\n<span class="k">NORMAL BOOT:</span> Freezes within minutes.\n<span class="k">SFC:</span> Already run: no integrity violations.',
+    diag:3, move:3,
+    debrief:'The Safe Mode verdict did the half-split: core Windows is fine (SFC agrees), so the cause is among what Safe Mode skipped: third-party drivers, services, startup apps. msconfig selective startup bisects that list. No reinstall, no reset: the ladder stays on rung one because the diagnosis is nearly done.'
+  },
+];
+var casesDiv = document.getElementById('cases');
+CASES.forEach(function(c, ci){
+  var card = document.createElement('div');
+  card.className = 'card';
+  var diagBtns = DIAGNOSES.map(function(d, i){ return '<button class="pill" onclick="pickDiag(' + ci + ',' + i + ',this)">' + d + '</button>'; }).join('');
+  var moveBtns = MOVES.map(function(m, i){ return '<button class="pill" onclick="pickMove(' + ci + ',' + i + ',this)">' + m + '</button>'; }).join('');
+  card.innerHTML =
+    '<div class="case-head"><h3 style="margin:0">' + c.title + '</h3><span class="badge open" id="cbadge' + ci + '">OPEN</span></div>' +
+    '<p style="font-style:italic;color:#CBD5E1;font-size:14px">' + c.sym + '</p>' +
+    '<div class="evidence">' + c.ev + '</div>' +
+    '<p class="mut" style="font-size:13px;margin-bottom:6px">The diagnosis:</p><div class="pill-row" id="diagRow' + ci + '">' + diagBtns + '</div>' +
+    '<p class="mut" style="font-size:13px;margin-bottom:6px">The next move:</p><div class="pill-row" id="moveRow' + ci + '">' + moveBtns + '</div>' +
+    '<div class="fb" id="cFb' + ci + '"></div>';
+  casesDiv.appendChild(card);
+});
+var caseState = CASES.map(function(){ return { diag:null, move:null }; });
+function caseCheck(ci){
+  var st = caseState[ci], c = CASES[ci];
+  if (st.diag === null || st.move === null) return;
+  var pts = (st.diag === c.diag ? 1 : 0) + (st.move === c.move ? 1 : 0);
+  score.cases[ci] = pts; updScore();
+  var fb = document.getElementById('cFb' + ci);
+  var badge = document.getElementById('cbadge' + ci);
+  if (pts === 2){
+    fb.className = 'fb show good';
+    fb.textContent = 'CASE CLOSED, 2/2. ' + c.debrief;
+    badge.className = 'badge solved'; badge.textContent = 'CLOSED 2/2';
+  } else {
+    fb.className = 'fb show bad';
+    fb.textContent = (pts === 1 ? 'Half right (1/2). ' : 'Not yet (0/2). ') + 'Re-read the evidence lines; every one is there for a reason, and one of them is the tell. You can change your answers.';
+    badge.className = 'badge open'; badge.textContent = pts + '/2';
+  }
+}
+function pickDiag(ci, i, el){
+  var row = document.getElementById('diagRow' + ci).children;
+  for (var j=0;j<row.length;j++) row[j].classList.remove('sel');
+  el.classList.add('sel');
+  caseState[ci].diag = i; caseCheck(ci);
+}
+function pickMove(ci, i, el){
+  var row = document.getElementById('moveRow' + ci).children;
+  for (var j=0;j<row.length;j++) row[j].classList.remove('sel');
+  el.classList.add('sel');
+  caseState[ci].move = i; caseCheck(ci);
+}
+
+// ===== SECTION 6: QUIZ =====
+var QUIZ = [
+  { q:'The first step of the universal method is:', o:['Restart and hope','Identify the symptom and reproduce it on demand','Open Event Viewer','Create a restore point'], a:1, fb:'A problem you cannot reproduce is a fix you can never verify.' },
+  { q:'When hunting a crash that happened at a known time, the strongest filter is:', o:['A keyword search for crash','The time window around it, plus Error and Critical levels','Sorting alphabetically','Exporting to Notepad'], a:1, fb:'Time is the index you already have; the error\u2019s wording rarely matches your guess.' },
+  { q:'Reliability Monitor\u2019s special talent is:', o:['Blocking bad installs','Plotting installs and failures on one timeline so correlations show themselves','Repairing system files','Running only in Safe Mode'], a:1, fb:'The cliff plus the gear one column left: what changed, drawn.' },
+  { q:'SFC says it found errors it could not fix. The sequence is:', o:['SFC again immediately','Reset this PC','DISM RestoreHealth, then SFC again','Reinstall Windows'], a:2, fb:'Fix the library (DISM), then fix the books (SFC).' },
+  { q:'A problem persists in Safe Mode. The suspect pool is now:', o:['Third-party startup apps','Browser extensions','Core Windows or hardware','The network printer'], a:2, fb:'Only the essentials loaded, and the problem survived among them.' },
+  { q:'WinRE demands the BitLocker key because:', o:['WinRE is older than BitLocker','Booting WinRE is not a verified boot of YOUR Windows, so the TPM will not vouch','The key expires daily','BitLocker blocks all repairs permanently'], a:1, fb:'The repair tool and the thief\u2019s USB stick are the same idea wearing different hats; the TPM treats them identically.' },
+  { q:'A user deleted a document and asks for System Restore. You explain:', o:['Restore will return the file by tonight','Restore points capture system state, not personal files; the file needs File History or a backup','Only Microsoft support can restore files','The file is in the TPM'], a:1, fb:'Case C. Matching the layer to the disaster is the skill.' },
+  { q:'A snapshot of a VM stored on the same host disk is:', o:['Full 3-2-1 compliance','Insurance against mistakes, but not against disasters that take the disk','Better than an exported copy','Automatically off-site'], a:1, fb:'One copy, same media, nothing off-site: run the arithmetic before trusting it.' }
+];
+var quizDiv = document.getElementById('quiz');
+QUIZ.forEach(function(it, qi){
+  var d = document.createElement('div');
+  d.className = 'quiz-q';
+  d.innerHTML = '<div class="qt">' + (qi+1) + '. ' + it.q + '</div>' +
+    it.o.map(function(o, oi){ return '<button class="opt" onclick="answer(' + qi + ',' + oi + ',this)">' + o + '</button>'; }).join('') +
+    '<div class="fb" id="qfb' + qi + '"></div>';
+  quizDiv.appendChild(d);
+});
+var answered = {};
+function answer(qi, oi, el){
+  if (answered[qi]) return;
+  answered[qi] = true;
+  var it = QUIZ[qi];
+  var fb = document.getElementById('qfb' + qi);
+  var opts = el.parentNode.querySelectorAll('.opt');
+  opts[it.a].classList.add('right');
+  if (oi === it.a){
+    score.quiz[qi] = 1;
+    fb.className = 'fb show good'; fb.textContent = 'Correct. ' + it.fb;
+  } else {
+    score.quiz[qi] = 0;
+    el.classList.add('wrong');
+    fb.className = 'fb show bad'; fb.textContent = it.fb;
+  }
+  updScore();
+  if (Object.keys(answered).length === QUIZ.length) finalReport();
+}
+function finalReport(){
+  var t = score.total();
+  document.getElementById('finalBox').style.display = 'block';
+  document.getElementById('finalScore').textContent = t + ' / 16';
+  var msg;
+  if (t >= 15) msg = 'On-call grade with honors. The desk is yours; go stage the real crash in the lab.';
+  else if (t >= 13) msg = 'On-call grade. You triage like the method is reflex now. Take it to the lab.';
+  else if (t >= 9) msg = 'Solid groundwork. Re-run the triage cases; their four patterns are the lab\u2019s graded judgments.';
+  else msg = 'Reload and run it again. Spend extra time in the diary room and the cases; the lab assumes both.';
+  document.getElementById('finalMsg').textContent = msg;
+  document.getElementById('finalBox').scrollIntoView({ behavior:'smooth' });
+}
+updScore();
+
+</script>
+</body>
+</html>
