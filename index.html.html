@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOS130 Unit 1 Tutorial: Install Windows 11</title>
+<style>
+:root{
+  --bg:#0E1525; --panel:#16203A; --panel2:#1C2A4A; --line:#2B3B5E;
+  --teal:#2DD4BF; --teal-dim:#14B8A6; --teal-dark:#0B4F52;
+  --ink:#E6EDF3; --mid:#9FB0C3; --gold:#FACC15; --red:#F87171; --green:#4ADE80;
+  --mono:'Cascadia Code','Consolas','Menlo',monospace;
+  --sans:'Segoe UI',system-ui,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;min-height:100vh}
+.wrap{max-width:960px;margin:0 auto;padding:24px 20px 80px}
+header.top{border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:18px}
+.kicker{font-family:var(--mono);color:var(--teal);font-size:13px;letter-spacing:2px}
+h1{font-size:26px;margin-top:6px}
+.sub{color:var(--mid);font-size:14px;margin-top:4px}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 26px}
+nav button{background:var(--panel);border:1px solid var(--line);color:var(--mid);
+  font-family:var(--mono);font-size:12.5px;padding:8px 12px;border-radius:8px;cursor:pointer}
+nav button.active{border-color:var(--teal);color:var(--teal)}
+nav button.done::after{content:" ✓";color:var(--green)}
+section.panel{display:none}
+section.panel.show{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h2{font-size:20px;margin-bottom:10px}
+h2 .num{font-family:var(--mono);color:var(--teal);margin-right:8px}
+p.lead{color:var(--mid);margin-bottom:16px}
+.term{background:#0A0F1E;border:1px solid var(--line);border-radius:10px;padding:16px;
+  font-family:var(--mono);font-size:13.5px;min-height:120px;white-space:pre-wrap;margin-bottom:14px}
+.term .p{color:var(--teal)}
+.term .ok{color:var(--green)} .term .bad{color:var(--red)} .term .wn{color:var(--gold)}
+.cursor{display:inline-block;width:8px;height:15px;background:var(--teal);vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.btn{background:var(--teal-dark);border:1px solid var(--teal-dim);color:var(--ink);
+  padding:9px 16px;border-radius:8px;cursor:pointer;font-size:14px;font-family:var(--sans)}
+.btn:hover{background:#0E6266}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--mid)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.cardrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:14px 0}
+.mcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.mcard h3{font-family:var(--mono);font-size:14px;color:var(--teal);margin-bottom:8px}
+.spec{font-family:var(--mono);font-size:12.5px;color:var(--mid);margin:2px 0}
+.spec b{color:var(--ink);font-weight:600}
+.verdict{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.verdict button{flex:1;min-width:90px;background:var(--panel2);border:1px solid var(--line);
+  color:var(--ink);padding:7px;border-radius:7px;cursor:pointer;font-size:13px}
+.verdict button:hover{border-color:var(--teal)}
+select,input[type=range]{accent-color:var(--teal)}
+select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:7px;font-size:13.5px}
+.fb{border-radius:8px;padding:10px 12px;font-size:13.5px;margin-top:10px;display:none}
+.fb.show{display:block}
+.fb.good{background:#10301F;border:1px solid #1E5A38;color:var(--green)}
+.fb.bad{background:#3A1520;border:1px solid #6B2436;color:#FCA5A5}
+.fb.info{background:#262007;border:1px solid #574A11;color:var(--gold)}
+.vmform{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:14px}
+.vmrow{display:flex;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.vmrow label{font-family:var(--mono);font-size:13px;color:var(--mid);width:160px}
+.vmrow output{font-family:var(--mono);color:var(--teal);min-width:90px}
+.check{display:flex;align-items:center;gap:8px;font-size:14px}
+.check input{width:17px;height:17px;accent-color:var(--teal)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin:14px 0}
+.steps button{background:var(--panel);border:1px solid var(--line);color:var(--ink);
+  padding:12px;border-radius:9px;cursor:pointer;font-size:13.5px;text-align:left;min-height:64px}
+.steps button:hover{border-color:var(--teal)}
+.steps button.placed{background:var(--teal-dark);border-color:var(--teal-dim);cursor:default}
+.steps button.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.seq{font-family:var(--mono);font-size:13px;color:var(--mid);min-height:24px;margin-bottom:6px}
+.toggle{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:10px}
+.toggle .trow{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.toggle h3{font-size:15px}
+.switch{position:relative;width:46px;height:24px;flex:none}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:var(--panel2);border:1px solid var(--line);border-radius:24px;cursor:pointer;transition:.2s}
+.slider::before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:var(--mid);border-radius:50%;transition:.2s}
+.switch input:checked + .slider{background:var(--teal-dark);border-color:var(--teal-dim)}
+.switch input:checked + .slider::before{transform:translateX(22px);background:var(--teal)}
+.why{color:var(--mid);font-size:13px;margin-top:8px;display:none}
+.why.show{display:block}
+.qz{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:12px}
+.qz h3{font-size:15px;margin-bottom:10px}
+.qz .opts{display:grid;gap:8px}
+.qz .opts button{background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+  padding:9px 12px;border-radius:8px;cursor:pointer;text-align:left;font-size:13.5px}
+.qz .opts button:hover{border-color:var(--teal)}
+.qz .opts button.right{border-color:var(--green);color:var(--green)}
+.qz .opts button.wrong{border-color:var(--red);color:var(--red)}
+.score{font-family:var(--mono);font-size:15px;color:var(--teal);margin:14px 0}
+.note{border-left:3px solid var(--gold);background:#1d1a10;padding:10px 14px;border-radius:0 8px 8px 0;
+  font-size:13.5px;color:#E8DCAE;margin:14px 0}
+footer{margin-top:40px;border-top:1px solid var(--line);padding-top:14px;color:var(--mid);font-size:12.5px;font-family:var(--mono)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="kicker">NOS130 · UNIT 1 · INTERACTIVE TUTORIAL</div>
+  <h1>Install Windows 11: The Simulator</h1>
+  <div class="sub">Practice every decision point of a clean install before you touch your real lab VM. Fully offline. Nothing here can break anything, so experiment freely.</div>
+</header>
+
+<nav id="nav">
+  <button data-s="0" class="active">1 · boot</button>
+  <button data-s="1">2 · compatibility lab</button>
+  <button data-s="2">3 · vm builder</button>
+  <button data-s="3">4 · install sequencer</button>
+  <button data-s="4">5 · oobe privacy</button>
+  <button data-s="5">6 · knowledge check</button>
+</nav>
+
+<!-- ── Section 0: Boot intro ─────────────────────────────────── -->
+<section class="panel show" id="s0">
+  <h2><span class="num">01</span>Boot</h2>
+  <div class="term" id="bootTerm"></div>
+  <button class="btn" id="bootBtn">Run boot sequence</button>
+  <button class="btn ghost" id="skipBoot">Skip animation</button>
+  <div class="note" style="display:none" id="bootNote">
+    This tutorial mirrors your Unit 1 lab. Work the sections in order: check hardware, build the VM, run the install, survive OOBE, then prove it in the knowledge check. Green checkmarks in the menu track your progress. Progress resets if you close the page, so finish a section once you start it.
+  </div>
+</section>
+
+<!-- ── Section 1: Compatibility lab ──────────────────────────── -->
+<section class="panel" id="s1">
+  <h2><span class="num">02</span>Compatibility Lab</h2>
+  <p class="lead">Three machines have arrived at your help desk bench. Run the diagnostic on each, read the output like a technician, and give your verdict: can it run Windows 11, and if not, what is the single blocking component?</p>
+  <div class="cardrow" id="machines"></div>
+  <div class="fb" id="compatFb"></div>
+</section>
+
+<!-- ── Section 2: VM builder ─────────────────────────────────── -->
+<section class="panel" id="s2">
+  <h2><span class="num">03</span>VM Builder</h2>
+  <p class="lead">Configure a virtual machine for Windows 11, then try to boot the installer. If setup refuses to run, read the error and fix the configuration. This is exactly the wall you can hit in the real lab, made safe.</p>
+  <div class="vmform">
+    <div class="vmrow"><label>Base memory</label><input type="range" id="vmRam" min="1024" max="8192" step="1024" value="2048"><output id="ramOut">2048 MB</output></div>
+    <div class="vmrow"><label>Processors</label><input type="range" id="vmCpu" min="1" max="4" step="1" value="1"><output id="cpuOut">1 CPU</output></div>
+    <div class="vmrow"><label>Virtual disk</label><input type="range" id="vmDisk" min="32" max="128" step="32" value="64"><output id="diskOut">64 GB</output></div>
+    <div class="vmrow"><label>Firmware</label><div class="check"><input type="checkbox" id="vmEfi"><span>Enable EFI</span></div></div>
+    <div class="vmrow"><label>TPM</label><select id="vmTpm"><option value="none">None</option><option value="1.2">v1.2</option><option value="2.0">v2.0</option></select></div>
+    <div class="vmrow"><label>Unattended install</label><div class="check"><input type="checkbox" id="vmUnatt" checked><span>Let VirtualBox click through setup for me</span></div></div>
+    <button class="btn" id="vmBoot">Start VM and boot installer</button>
+  </div>
+  <div class="term" id="vmTerm">VM console output appears here.</div>
+  <div class="fb" id="vmFb"></div>
+</section>
+
+<!-- ── Section 3: Install sequencer ──────────────────────────── -->
+<section class="panel" id="s3">
+  <h2><span class="num">04</span>Install Sequencer</h2>
+  <p class="lead">The eight moments of a clean install, shuffled. Click them in the order they actually happen. A wrong click costs nothing but tells you why it is wrong.</p>
+  <div class="seq" id="seqLine">Your sequence: (empty)</div>
+  <div class="steps" id="stepGrid"></div>
+  <div class="fb" id="seqFb"></div>
+  <button class="btn ghost" id="seqReset">Reset sequence</button>
+</section>
+
+<!-- ── Section 4: OOBE privacy ───────────────────────────────── -->
+<section class="panel" id="s4">
+  <h2><span class="num">05</span>OOBE Privacy Screens</h2>
+  <p class="lead">Scenario: you are setting up a work laptop for a client who is privacy-conscious but needs the machine to be findable if stolen. Set each toggle, then check your reasoning against the field notes. There is judgment here, not one perfect answer, but some choices are easier to defend than others.</p>
+  <div id="toggles"></div>
+  <button class="btn" id="oobeCheck">Compare with field notes</button>
+  <div class="fb" id="oobeFb"></div>
+</section>
+
+<!-- ── Section 5: Knowledge check ────────────────────────────── -->
+<section class="panel" id="s5">
+  <h2><span class="num">06</span>Knowledge Check</h2>
+  <p class="lead">Eight questions, instant feedback, no grade recorded. The real quiz draws from the same well.</p>
+  <div id="quiz"></div>
+  <div class="score" id="scoreLine"></div>
+</section>
+
+<footer>NOS130 Windows Single User · Blue Ridge Community College · Unit 1 · works fully offline</footer>
+</div>
+
+<script>
+// ── Nav and progress ─────────────────────────────────────────
+const navBtns=[...document.querySelectorAll('#nav button')];
+const panels=[...document.querySelectorAll('section.panel')];
+const done=new Set();
+navBtns.forEach(b=>b.addEventListener('click',()=>show(+b.dataset.s)));
+function show(i){panels.forEach((p,j)=>p.classList.toggle('show',i===j));
+  navBtns.forEach((b,j)=>b.classList.toggle('active',i===j));}
+function markDone(i){done.add(i);navBtns[i].classList.add('done');}
+
+// ── Typing engine ────────────────────────────────────────────
+function typeLines(el,lines,speed,cb){
+  el.innerHTML='';let li=0,ci=0;const cur=document.createElement('span');cur.className='cursor';
+  el.appendChild(cur);
+  function tick(){
+    if(li>=lines.length){cur.remove();if(cb)cb();return;}
+    const [cls,text]=lines[li];
+    if(ci===0){const sp=document.createElement('span');if(cls)sp.className=cls;el.insertBefore(sp,cur);}
+    const sp=cur.previousSibling;
+    if(ci<text.length){sp.textContent+=text[ci++];setTimeout(tick,speed);}
+    else{el.insertBefore(document.createTextNode('\n'),cur);li++;ci=0;setTimeout(tick,speed*8);}
+  }
+  tick();
+}
+
+// ── Section 0: boot ──────────────────────────────────────────
+const bootLines=[
+ ['p','NOS130-TUTOR v1.0  ·  initializing'],
+ ['','checking firmware ......... UEFI'],
+ ['','checking secure boot ...... ON'],
+ ['','checking TPM ............... 2.0'],
+ ['ok','all Windows 11 requirements satisfied'],
+ ['','loading modules: compat-lab, vm-builder, sequencer, oobe, quiz'],
+ ['ok','ready. five exercises ahead. nothing here can break. go.'],
+];
+const bootTerm=document.getElementById('bootTerm');
+document.getElementById('bootBtn').addEventListener('click',()=>{
+  typeLines(bootTerm,bootLines,14,()=>{document.getElementById('bootNote').style.display='block';markDone(0);});
+});
+document.getElementById('skipBoot').addEventListener('click',()=>{
+  bootTerm.innerHTML=bootLines.map(l=>`<span class="${l[0]}">${l[1]}</span>`).join('\n');
+  document.getElementById('bootNote').style.display='block';markDone(0);
+});
+
+// ── Section 1: compatibility lab ─────────────────────────────
+const machines=[
+ {id:'BENCH-01',specs:{CPU:'Intel Core i5-13400 (supported list: YES)',RAM:'16 GB',Storage:'512 GB SSD',Firmware:'UEFI · Secure Boot ON',TPM:'2.0'},eligible:true,block:null},
+ {id:'BENCH-02',specs:{CPU:'Intel Core i7-6700K (supported list: NO)',RAM:'32 GB',Storage:'1 TB SSD',Firmware:'UEFI · Secure Boot ON',TPM:'2.0'},eligible:false,block:'CPU'},
+ {id:'BENCH-03',specs:{CPU:'AMD Ryzen 5 5600 (supported list: YES)',RAM:'8 GB',Storage:'256 GB SSD',Firmware:'UEFI · Secure Boot ON',TPM:'none detected'},eligible:false,block:'TPM'},
+];
+const mWrap=document.getElementById('machines');const compatState={};
+machines.forEach(m=>{
+  const card=document.createElement('div');card.className='mcard';
+  card.innerHTML=`<h3>${m.id}</h3>`+Object.entries(m.specs).map(([k,v])=>`<div class="spec">${k.padEnd(8,' ')}: <b>${v}</b></div>`).join('')+
+   `<div class="verdict">
+      <button data-m="${m.id}" data-v="ok">Eligible</button>
+      <button data-m="${m.id}" data-v="CPU">Blocked: CPU</button>
+      <button data-m="${m.id}" data-v="RAM">Blocked: RAM</button>
+      <button data-m="${m.id}" data-v="TPM">Blocked: TPM</button>
+    </div>`;
+  mWrap.appendChild(card);
+});
+const compatFb=document.getElementById('compatFb');
+mWrap.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  const m=machines.find(x=>x.id===b.dataset.m);const v=b.dataset.v;
+  const correct=m.eligible? v==='ok' : v===m.block;
+  compatState[m.id]=correct;
+  compatFb.className='fb show '+(correct?'good':'bad');
+  if(correct){
+    compatFb.textContent=m.eligible
+      ? `${m.id}: correct. Every gate passes, including the CPU support list. Cleared for Windows 11.`
+      : `${m.id}: correct. The ${m.block} is the single blocker. Notice the generous RAM and storage did not save it; the gatekeepers are the CPU list and TPM 2.0.`;
+  } else {
+    compatFb.textContent=`${m.id}: not quite. Reread the diagnostic line by line. Minimums are 4 GB RAM and 64 GB storage; the usual blockers are the CPU support list and the TPM.`;
+  }
+  if(Object.keys(compatState).length===3 && Object.values(compatState).every(Boolean)){
+    compatFb.className='fb show good';
+    compatFb.textContent='All three verdicts correct. That is the exact triage a help desk ran a million times during the Windows 10 migration. Section complete.';
+    markDone(1);
+  }
+});
+
+// ── Section 2: VM builder ────────────────────────────────────
+const ramOut=document.getElementById('ramOut'),cpuOut=document.getElementById('cpuOut'),diskOut=document.getElementById('diskOut');
+document.getElementById('vmRam').addEventListener('input',e=>ramOut.textContent=e.target.value+' MB');
+document.getElementById('vmCpu').addEventListener('input',e=>cpuOut.textContent=e.target.value+' CPU'+(e.target.value>1?'s':''));
+document.getElementById('vmDisk').addEventListener('input',e=>diskOut.textContent=e.target.value+' GB');
+const vmTerm=document.getElementById('vmTerm'),vmFb=document.getElementById('vmFb');
+document.getElementById('vmBoot').addEventListener('click',()=>{
+  const ram=+document.getElementById('vmRam').value, cpu=+document.getElementById('vmCpu').value,
+        disk=+document.getElementById('vmDisk').value, efi=document.getElementById('vmEfi').checked,
+        tpm=document.getElementById('vmTpm').value, unatt=document.getElementById('vmUnatt').checked;
+  const lines=[['p','starting NOS130-Win11 ...'],['','virtual hardware: '+ram+' MB · '+cpu+' CPU · '+disk+' GB disk'],
+               ['','firmware: '+(efi?'EFI':'legacy BIOS')+' · TPM: '+tpm]];
+  let fail=null;
+  if(!efi||tpm!=='2.0') fail=['bad','SETUP ERROR: This PC can\'t run Windows 11. This PC doesn\'t meet the minimum system requirements.'];
+  else if(ram<4096) fail=['bad','SETUP ERROR: Windows 11 requires at least 4 GB of memory.'];
+  else if(disk<64) fail=['bad','SETUP ERROR: We couldn\'t find a drive that meets the 64 GB requirement.'];
+  if(fail){lines.push(fail);}
+  else{
+    lines.push(['ok','boot device: virtual DVD ... Press any key to boot from CD or DVD']);
+    lines.push(['ok','Windows Setup is starting ...']);
+    if(unatt) lines.push(['wn','NOTICE: unattended install is ON. VirtualBox will click through setup and OOBE for you.']);
+  }
+  typeLines(vmTerm,lines,10,()=>{
+    if(fail){
+      vmFb.className='fb show bad';
+      vmFb.textContent=(!efi||tpm!=='2.0')
+       ? 'Setup refused to run. The Windows 11 hardware gates apply inside a VM too: it needs EFI firmware and a TPM 2.0. Fix the configuration and boot again.'
+       : 'Close, but a minimum is not met. Check memory (4096 MB or more) and disk (64 GB or more), then boot again.';
+    } else if(unatt){
+      vmFb.className='fb show info';
+      vmFb.textContent='It boots, but with unattended install enabled you would never see partitioning or OOBE, the two skills this unit exists to teach. Turn it off and boot once more for the complete pass.';
+    } else {
+      vmFb.className='fb show good';
+      vmFb.textContent='Perfect configuration: EFI on, TPM 2.0, enough memory and disk, and unattended install off so you do the install yourself. This is exactly your lab recipe. Section complete.';
+      markDone(2);
+    }
+  });
+});
+
+// ── Section 3: install sequencer ─────────────────────────────
+const stepsTrue=[
+ 'Boot the VM from the ISO and press a key',
+ 'Choose language, then Install now',
+ 'Click I don\'t have a product key',
+ 'Select the Windows 11 Pro edition',
+ 'Custom install: select unallocated space',
+ 'Files copy; setup reboots more than once',
+ 'OOBE: region, network, name, account, privacy',
+ 'Post-install: updates, drivers, snapshot'
+];
+const why=[
+ 'Everything starts by booting installation media.',
+ 'Language and locale come before any install action.',
+ 'The key question appears before edition choice in setup.',
+ 'Edition selection follows the product key step.',
+ 'Partitioning happens after the edition and license.',
+ 'Copying and reboots run only after a target disk exists.',
+ 'OOBE begins after the final setup reboot.',
+ 'Post-install work is the finish line, after OOBE.'
+];
+let seqPos=0;
+const grid=document.getElementById('stepGrid'),seqLine=document.getElementById('seqLine'),seqFb=document.getElementById('seqFb');
+function buildSeq(){
+  grid.innerHTML='';seqPos=0;seqLine.textContent='Your sequence: (empty)';seqFb.className='fb';
+  const order=stepsTrue.map((s,i)=>i).sort(()=>Math.random()-0.5);
+  order.forEach(i=>{
+    const b=document.createElement('button');b.textContent=stepsTrue[i];b.dataset.i=i;
+    b.addEventListener('click',()=>{
+      if(b.classList.contains('placed'))return;
+      if(+b.dataset.i===seqPos){
+        b.classList.add('placed');b.textContent=(seqPos+1)+'. '+stepsTrue[seqPos];
+        seqLine.textContent='Your sequence: '+stepsTrue.slice(0,seqPos+1).map((s,j)=>j+1).join(' → ');
+        seqPos++;
+        if(seqPos===stepsTrue.length){
+          seqFb.className='fb show good';
+          seqFb.textContent='Eight for eight. You can now narrate a clean install from cold boot to snapshot, which is more than most working techs can do from memory. Section complete.';
+          markDone(3);
+        }
+      } else {
+        b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),320);
+        seqFb.className='fb show bad';
+        seqFb.textContent='Not yet. Next up is step '+(seqPos+1)+'. Hint: '+why[seqPos];
+      }
+    });
+    grid.appendChild(b);
+  });
+}
+buildSeq();
+document.getElementById('seqReset').addEventListener('click',buildSeq);
+
+// ── Section 4: OOBE privacy ──────────────────────────────────
+const togglesDef=[
+ {name:'Location services',rec:true,note:'For a machine that must be findable if stolen, location stays ON. Find My Device depends on it. This is the toggle the scenario hinges on.'},
+ {name:'Find My Device',rec:true,note:'ON. It is the direct answer to the client\'s theft concern, and it requires location services above.'},
+ {name:'Send diagnostic data: Optional (full)',rec:false,note:'OFF is the defensible privacy-conscious choice. Required diagnostics still flow; the optional tier adds browsing and app usage detail the client does not need to share.'},
+ {name:'Tailored experiences',rec:false,note:'OFF. This is marketing personalization built on diagnostic data. Nothing breaks without it.'},
+ {name:'Advertising ID',rec:false,note:'OFF. Apps lose cross-app ad tracking, the client loses nothing. The easiest privacy win on the list.'},
+];
+const tWrap=document.getElementById('toggles');
+togglesDef.forEach((t,i)=>{
+  const d=document.createElement('div');d.className='toggle';
+  d.innerHTML=`<div class="trow"><h3>${t.name}</h3>
+    <label class="switch"><input type="checkbox" id="tg${i}"><span class="slider"></span></label></div>
+    <div class="why" id="why${i}"></div>`;
+  tWrap.appendChild(d);
+});
+document.getElementById('oobeCheck').addEventListener('click',()=>{
+  let agree=0;
+  togglesDef.forEach((t,i)=>{
+    const v=document.getElementById('tg'+i).checked;
+    const w=document.getElementById('why'+i);
+    w.className='why show';
+    w.innerHTML=(v===t.rec?'<span style="color:var(--green)">Matches the field notes.</span> ':'<span style="color:var(--gold)">Different call than the field notes.</span> ')+t.note;
+    if(v===t.rec)agree++;
+  });
+  const fb=document.getElementById('oobeFb');
+  fb.className='fb show '+(agree>=4?'good':'info');
+  fb.textContent=agree>=4
+    ? `You matched the field notes on ${agree} of 5. More important: you can now explain every toggle to a client, which is the actual skill. Section complete.`
+    : `You matched the field notes on ${agree} of 5. Disagreement is allowed, but read each note and make sure you could defend your call to the client. Then adjust and compare again if you like.`;
+  markDone(4);
+});
+
+// ── Section 5: knowledge check ───────────────────────────────
+const quizDef=[
+ {q:'Setup shows: This PC can\'t run Windows 11. In a VirtualBox VM, the two settings to check first are:',o:['Disk size and network type','EFI and TPM 2.0','Shared clipboard and drag-and-drop','Snapshot name and folder'],a:1},
+ {q:'Which edition is the minimum with BitLocker and Local Group Policy?',o:['Home','Pro','Any edition','None of them'],a:1},
+ {q:'The official minimum RAM and storage for Windows 11 are:',o:['2 GB and 32 GB','4 GB and 64 GB','8 GB and 128 GB','16 GB and 256 GB'],a:1},
+ {q:'At the partition screen on a fresh 64 GB disk, the correct move is:',o:['Manually create four partitions','Format the disk in another tool first','Select the unallocated space and click Next','Cancel and enable BitLocker'],a:2},
+ {q:'OOBE is best described as:',o:['The recovery environment','The first-run interview: region, network, name, account, privacy','A VirtualBox feature','The Windows Update schedule'],a:1},
+ {q:'Feature updates vs quality updates:',o:['Feature monthly, quality yearly','Feature yearly (24H2, 25H2), quality monthly on Patch Tuesday','Both arrive weekly','Quality updates are optional forever'],a:1},
+ {q:'After an in-place upgrade from Windows 10, the rollback window lasts:',o:['24 hours','10 days','90 days','Forever'],a:1},
+ {q:'500 new laptops ship factory-direct to employees and configure themselves from the cloud at first sign-in. That is:',o:['Imaging','Media Creation Tool','Windows Autopilot','Reset this PC'],a:2},
+];
+const quizWrap=document.getElementById('quiz');let answered=0,scored=0;
+quizDef.forEach((item,qi)=>{
+  const d=document.createElement('div');d.className='qz';
+  d.innerHTML=`<h3>${qi+1}. ${item.q}</h3><div class="opts"></div>`;
+  const opts=d.querySelector('.opts');
+  item.o.forEach((opt,oi)=>{
+    const b=document.createElement('button');b.textContent=opt;
+    b.addEventListener('click',()=>{
+      if(d.dataset.done)return;d.dataset.done='1';answered++;
+      if(oi===item.a){b.classList.add('right');scored++;}
+      else{b.classList.add('wrong');opts.children[item.a].classList.add('right');}
+      if(answered===quizDef.length){
+        document.getElementById('scoreLine').textContent=`score: ${scored}/${quizDef.length} ${scored===quizDef.length?'· flawless. go take the real quiz.':scored>=6?'· solid. review the misses, then the real quiz.':'· revisit sections 2 through 5, then try the real quiz.'}`;
+        markDone(5);
+      }
+    });
+    opts.appendChild(b);
+  });
+  quizWrap.appendChild(d);
+});
+</script>
+</body>
+</html>
