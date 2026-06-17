@@ -3,136 +3,128 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interactive tutorials for NOS 130: Windows Single User at Blue Ridge Community College.">
   <title>NOS 130 Interactive Tutorials</title>
-  <meta name="description" content="Interactive tutorials for NOS 130: Windows Single User.">
+
   <style>
     :root {
-      --navy: #1e2761;
-      --teal: #028090;
-      --teal-light: #0fb8cc;
-      --green: #39d353;
+      --background: #0d1117;
+      --background-secondary: #111722;
       --surface: #161b22;
-      --surface-2: #1c2128;
-      --surface-3: #21262d;
+      --surface-secondary: #1c2128;
       --border: #30363d;
       --text: #e6edf3;
       --muted: #9aa4af;
+      --teal: #028090;
+      --teal-light: #0fb8cc;
+      --green: #39d353;
+      --amber: #f5a623;
       --white: #ffffff;
-      --focus: #f5a623;
-      --max-width: 980px;
+      --maximum-width: 1200px;
+      --sans: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono: Consolas, "SFMono-Regular", "Courier New", monospace;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
-    html {
-      scroll-behavior: smooth;
-    }
+    html { scroll-behavior: smooth; }
 
     body {
-      margin: 0;
-      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background:
-        radial-gradient(circle at top right, rgba(2, 128, 144, 0.18), transparent 32rem),
-        linear-gradient(180deg, #0d1117 0%, #111722 100%);
-      color: var(--text);
       min-height: 100vh;
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(2,128,144,.18), transparent 34rem),
+        linear-gradient(180deg, var(--background) 0%, var(--background-secondary) 100%);
+      font-family: var(--sans);
       line-height: 1.6;
     }
 
-    a {
-      color: inherit;
-    }
+    a { color: inherit; }
 
-    a:focus-visible,
-    button:focus-visible {
-      outline: 3px solid var(--focus);
+    a:focus-visible {
+      outline: 3px solid var(--amber);
       outline-offset: 4px;
     }
 
     .skip-link {
       position: absolute;
-      left: -9999px;
       top: 0;
+      left: -9999px;
       z-index: 1000;
-      background: var(--white);
+      padding: .75rem 1rem;
       color: #111;
-      padding: 0.75rem 1rem;
+      background: var(--white);
       border-radius: 0 0 6px 0;
       font-weight: 700;
     }
 
-    .skip-link:focus {
-      left: 0;
-    }
+    .skip-link:focus { left: 0; }
 
     header {
+      background: rgba(22,27,34,.94);
       border-bottom: 1px solid var(--border);
-      background: rgba(22, 27, 34, 0.92);
       backdrop-filter: blur(12px);
     }
 
     .header-inner,
     main,
     footer {
-      width: min(calc(100% - 2rem), var(--max-width));
+      width: min(calc(100% - 2rem), var(--maximum-width));
       margin: 0 auto;
     }
 
     .header-inner {
-      min-height: 64px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      min-height: 68px;
       gap: 1rem;
     }
 
     .course-code {
-      font-family: Consolas, "SFMono-Regular", monospace;
       color: var(--teal-light);
-      font-size: 0.8rem;
+      font-family: var(--mono);
+      font-size: .8rem;
       font-weight: 700;
-      letter-spacing: 0.12em;
+      letter-spacing: .12em;
       text-transform: uppercase;
     }
 
-    .instructor {
+    .college-name {
       color: var(--muted);
-      font-size: 0.9rem;
+      font-size: .9rem;
     }
 
-    main {
-      padding: 4rem 0 5rem;
-    }
+    main { padding: 4rem 0 5rem; }
 
     .hero {
       display: grid;
-      grid-template-columns: 1.4fr 0.8fr;
-      gap: 2rem;
+      grid-template-columns: 1.35fr .75fr;
       align-items: center;
-      margin-bottom: 3rem;
+      gap: 2rem;
+      margin-bottom: 3.5rem;
     }
 
     .eyebrow {
-      margin: 0 0 0.75rem;
+      margin: 0 0 .75rem;
       color: var(--teal-light);
-      font-family: Consolas, "SFMono-Regular", monospace;
-      font-size: 0.78rem;
+      font-family: var(--mono);
+      font-size: .78rem;
       font-weight: 700;
-      letter-spacing: 0.14em;
+      letter-spacing: .14em;
       text-transform: uppercase;
     }
 
     h1 {
-      margin: 0;
       max-width: 13ch;
-      font-size: clamp(2.3rem, 7vw, 4.8rem);
+      margin: 0;
+      font-size: clamp(2.4rem, 7vw, 4.8rem);
       line-height: 1.02;
-      letter-spacing: -0.04em;
+      letter-spacing: -.04em;
     }
 
-    .hero p {
+    .hero-copy {
       max-width: 62ch;
       margin: 1.25rem 0 0;
       color: var(--muted);
@@ -140,40 +132,31 @@
     }
 
     .hero-panel {
-      background: linear-gradient(145deg, rgba(2, 128, 144, 0.18), rgba(30, 39, 97, 0.22));
-      border: 1px solid rgba(15, 184, 204, 0.45);
-      border-radius: 18px;
       padding: 1.5rem;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+      background: linear-gradient(145deg, rgba(2,128,144,.18), rgba(30,39,97,.22));
+      border: 1px solid rgba(15,184,204,.45);
+      border-radius: 18px;
+      box-shadow: 0 24px 60px rgba(0,0,0,.25);
     }
 
     .hero-panel-label {
-      margin: 0 0 0.75rem;
+      margin: 0 0 .75rem;
       color: var(--teal-light);
-      font-family: Consolas, "SFMono-Regular", monospace;
-      font-size: 0.75rem;
+      font-family: var(--mono);
+      font-size: .75rem;
       font-weight: 700;
-      letter-spacing: 0.1em;
+      letter-spacing: .1em;
       text-transform: uppercase;
     }
 
-    .hero-panel ul {
-      margin: 0;
-      padding-left: 1.25rem;
-      color: var(--text);
-    }
+    .hero-panel ul { margin: 0; padding-left: 1.25rem; }
+    .hero-panel li + li { margin-top: .55rem; }
 
-    .hero-panel li + li {
-      margin-top: 0.55rem;
-    }
-
-    .section-heading {
-      margin-bottom: 1rem;
-    }
+    .section-heading { margin-bottom: 1.25rem; }
 
     .section-heading h2 {
-      margin: 0 0 0.35rem;
-      font-size: 1.75rem;
+      margin: 0 0 .35rem;
+      font-size: 1.8rem;
     }
 
     .section-heading p {
@@ -183,16 +166,16 @@
 
     .tutorial-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 1.25rem;
     }
 
     .tutorial-card {
       display: flex;
       flex-direction: column;
-      min-height: 300px;
-      padding: 1.4rem;
-      background: var(--surface-2);
+      min-height: 430px;
+      padding: 1.5rem;
+      background: var(--surface-secondary);
       border: 1px solid var(--border);
       border-radius: 14px;
       transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
@@ -201,27 +184,54 @@
     .tutorial-card:hover {
       transform: translateY(-3px);
       border-color: var(--teal);
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+      box-shadow: 0 18px 40px rgba(0,0,0,.22);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+      margin-bottom: 1rem;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      width: fit-content;
+      padding: .3rem .65rem;
+      color: var(--green);
+      background: rgba(57,211,83,.1);
+      border: 1px solid rgba(57,211,83,.5);
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size: .72rem;
+      font-weight: 700;
+    }
+
+    .status::before {
+      content: "●";
+      font-size: .65rem;
     }
 
     .unit-number {
-      margin-bottom: 1rem;
       color: var(--teal-light);
-      font-family: Consolas, "SFMono-Regular", monospace;
-      font-size: 0.76rem;
+      font-family: var(--mono);
+      font-size: .76rem;
       font-weight: 700;
-      letter-spacing: 0.12em;
+      letter-spacing: .1em;
       text-transform: uppercase;
     }
 
     .tutorial-card h3 {
       margin: 0;
-      font-size: 1.35rem;
+      font-size: 1.38rem;
       line-height: 1.3;
     }
 
-    .tutorial-card p {
-      margin: 0.85rem 0 1.25rem;
+    .description {
+      margin: .85rem 0 1.15rem;
       color: var(--muted);
     }
 
@@ -229,112 +239,70 @@
       margin: 0 0 1.5rem;
       padding-left: 1.15rem;
       color: var(--text);
-      font-size: 0.94rem;
+      font-size: .94rem;
     }
 
-    .topic-list li + li {
-      margin-top: 0.35rem;
-    }
+    .topic-list li + li { margin-top: .35rem; }
+    .topic-list li::marker { color: var(--teal-light); }
 
-    .card-actions {
-      margin-top: auto;
-    }
+    .card-actions { margin-top: auto; }
 
     .button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 44px;
-      padding: 0.72rem 1rem;
-      border-radius: 8px;
-      background: var(--teal);
+      min-height: 46px;
+      padding: .75rem 1rem;
       color: var(--white);
+      background: var(--teal);
+      border: 1px solid var(--teal);
+      border-radius: 8px;
       text-decoration: none;
       font-weight: 700;
-      transition: background 180ms ease, transform 180ms ease;
+      transition: background 180ms ease, border-color 180ms ease;
     }
 
     .button:hover {
       background: var(--teal-light);
+      border-color: var(--teal-light);
     }
 
     .button::after {
-      content: " →";
-      margin-left: 0.4rem;
-    }
-
-    .coming-soon {
-      border-style: dashed;
-      opacity: 0.78;
-    }
-
-    .status {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      width: fit-content;
-      padding: 0.3rem 0.65rem;
-      border-radius: 999px;
-      background: rgba(57, 211, 83, 0.1);
-      border: 1px solid rgba(57, 211, 83, 0.5);
-      color: var(--green);
-      font-family: Consolas, "SFMono-Regular", monospace;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-
-    .status::before {
-      content: "●";
-      font-size: 0.7rem;
-    }
-
-    .coming-label {
-      display: inline-flex;
-      width: fit-content;
-      padding: 0.3rem 0.65rem;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-family: Consolas, "SFMono-Regular", monospace;
-      font-size: 0.75rem;
-      font-weight: 700;
+      content: "→";
+      margin-left: .5rem;
     }
 
     .help-note {
       margin-top: 2rem;
       padding: 1rem 1.2rem;
+      color: var(--muted);
       background: var(--surface);
       border-left: 4px solid var(--teal);
       border-radius: 0 10px 10px 0;
-      color: var(--muted);
     }
 
-    .help-note strong {
-      color: var(--text);
-    }
+    .help-note strong { color: var(--text); }
+    .help-note code { color: var(--teal-light); font-family: var(--mono); }
 
     footer {
       padding: 1.5rem 0 2.5rem;
-      border-top: 1px solid var(--border);
       color: var(--muted);
-      font-size: 0.9rem;
+      border-top: 1px solid var(--border);
+      font-size: .9rem;
       text-align: center;
     }
 
-    @media (max-width: 760px) {
-      .hero {
-        grid-template-columns: 1fr;
-      }
+    footer p { margin: 0; }
 
+    @media (max-width: 760px) {
+      .hero { grid-template-columns: 1fr; }
       .header-inner {
         align-items: flex-start;
         flex-direction: column;
-        padding: 0.9rem 0;
+        padding: .9rem 0;
       }
-
-      main {
-        padding-top: 2.5rem;
-      }
+      main { padding-top: 2.5rem; }
+      .tutorial-card { min-height: auto; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -347,13 +315,14 @@
     }
   </style>
 </head>
+
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
 
   <header>
     <div class="header-inner">
       <div class="course-code">NOS 130 / Windows Single User</div>
-      <div class="instructor">Interactive Learning Tutorials</div>
+      <div class="college-name">Blue Ridge Community College</div>
     </div>
   </header>
 
@@ -362,9 +331,9 @@
       <div>
         <p class="eyebrow">Learn · Practice · Apply</p>
         <h1 id="page-title">Interactive Tutorials</h1>
-        <p>
-          Explore Windows 11 concepts through guided explanations, simulations,
-          practice exercises, and knowledge checks. Select a unit below to begin.
+        <p class="hero-copy">
+          Explore Windows 11 through guided explanations, simulations,
+          practice exercises, and knowledge checks. Select a tutorial below to begin.
         </p>
       </div>
 
@@ -372,9 +341,9 @@
         <p class="hero-panel-label">Before you begin</p>
         <ul>
           <li>Use a current version of Chrome, Edge, or Firefox.</li>
-          <li>Complete each section in order.</li>
-          <li>Open the tutorial in a new window when using a phone or tablet.</li>
-          <li>Your work is for practice and is not sent to the Canvas Gradebook.</li>
+          <li>Complete each tutorial section in order.</li>
+          <li>Use a laptop or desktop for the best experience.</li>
+          <li>Tutorial results are for practice and are not sent to the Canvas Gradebook.</li>
         </ul>
       </aside>
     </section>
@@ -382,49 +351,197 @@
     <section aria-labelledby="tutorials-heading">
       <div class="section-heading">
         <h2 id="tutorials-heading">Available Tutorials</h2>
-        <p>More units will be added throughout the course.</p>
+        <p>Choose the tutorial that matches your current unit.</p>
       </div>
 
       <div class="tutorial-grid">
         <article class="tutorial-card">
-          <div class="status">Available now</div>
-          <div class="unit-number">Unit 1</div>
+          <div class="card-top">
+            <span class="status">Available now</span>
+            <span class="unit-number">Unit 1</span>
+          </div>
           <h3>Getting Oriented in Windows 11</h3>
-          <p>
-            Build confidence with the Windows 11 desktop, productivity tools,
-            Settings, Search, accessibility features, and keyboard shortcuts.
-          </p>
+          <p class="description">Build confidence with the Windows 11 desktop and the tools students use every day.</p>
           <ul class="topic-list">
-            <li>Desktop and taskbar components</li>
+            <li>Desktop environment and taskbar</li>
             <li>Snap Layouts and virtual desktops</li>
             <li>Settings versus Control Panel</li>
             <li>Windows Search</li>
-            <li>Accessibility and shortcuts</li>
+            <li>Accessibility and keyboard shortcuts</li>
           </ul>
           <div class="card-actions">
             <a class="button" href="./unit1/">Start Unit 1 Tutorial</a>
           </div>
         </article>
-
-        <article class="tutorial-card coming-soon">
-          <div class="coming-label">Coming soon</div>
-          <div class="unit-number">Future Units</div>
-          <h3>More Interactive Practice</h3>
-          <p>
-            Additional tutorials will appear here as they are added to the course.
-          </p>
+        <article class="tutorial-card">
+          <div class="card-top">
+            <span class="status">Available now</span>
+            <span class="unit-number">Unit 2</span>
+          </div>
+          <h3>Introduction to Microsoft 365 and Intune</h3>
+          <p class="description">Explore the cloud services and device-management concepts that support modern Windows environments.</p>
           <ul class="topic-list">
-            <li>Guided demonstrations</li>
-            <li>Interactive simulations</li>
-            <li>Practice checks</li>
-            <li>End-of-unit summaries</li>
+            <li>Microsoft 365 services</li>
+            <li>Microsoft Entra ID</li>
+            <li>Microsoft Intune</li>
+            <li>Cloud-managed versus locally managed devices</li>
+            <li>Device join types and Windows Autopilot</li>
           </ul>
+          <div class="card-actions">
+            <a class="button" href="./unit2/">Start Unit 2 Tutorial</a>
+          </div>
+        </article>
+        <article class="tutorial-card">
+          <div class="card-top">
+            <span class="status">Available now</span>
+            <span class="unit-number">Unit 3</span>
+          </div>
+          <h3>File and Folder Management</h3>
+          <p class="description">Practice organizing, protecting, compressing, synchronizing, and managing files in Windows.</p>
+          <ul class="topic-list">
+            <li>File Explorer and view options</li>
+            <li>Quick Access and Libraries</li>
+            <li>NTFS permissions and inheritance</li>
+            <li>Compression and OneDrive file states</li>
+            <li>Command Prompt and PowerShell file operations</li>
+          </ul>
+          <div class="card-actions">
+            <a class="button" href="./unit3/">Start Unit 3 Tutorial</a>
+          </div>
+        </article>
+        <article class="tutorial-card">
+          <div class="card-top">
+            <span class="status">Available now</span>
+            <span class="unit-number">Unit 4</span>
+          </div>
+          <h3>User Accounts and Security</h3>
+          <p class="description">Learn how Windows accounts, privileges, authentication, and family-management features work together.</p>
+          <ul class="topic-list">
+            <li>Local and Microsoft accounts</li>
+            <li>Standard users, administrators, and UAC</li>
+            <li>Creating and managing accounts</li>
+            <li>Windows Hello</li>
+            <li>Hello for Business, LAPS, and Family Safety</li>
+          </ul>
+          <div class="card-actions">
+            <a class="button" href="./unit4/">Start Unit 4 Tutorial</a>
+          </div>
+        </article>
+        <article class="tutorial-card">
+          <div class="card-top">
+            <span class="status">Available now</span>
+            <span class="unit-number">Unit 5</span>
+          </div>
+          <h3>System Settings and Configuration</h3>
+          <p class="description">Work through the major Windows settings used to configure devices for everyday use.</p>
+          <ul class="topic-list">
+            <li>Display settings</li>
+            <li>Power and sleep</li>
+            <li>Installing and managing applications</li>
+            <li>Default apps and printers</li>
+            <li>Notifications and regional settings</li>
+          </ul>
+          <div class="card-actions">
+            <a class="button" href="./unit5/">Start Unit 5 Tutorial</a>
+          </div>
+        </article>
+        <article class="tutorial-card">
+          <div class="card-top">
+            <span class="status">Available now</span>
+            <span class="unit-number">Unit 6</span>
+          </div>
+          <h3>The Network Detective</h3>
+          <p class="description">Use Windows networking information and diagnostic commands to investigate connectivity problems.</p>
+          <ul class="topic-list">
+            <li>Core network configuration values</li>
+            <li>Identifying incorrect configurations</li>
+            <li>Windows networking commands</li>
+            <li>A structured troubleshooting ladder</li>
+            <li>Interactive network case files</li>
+          </ul>
+          <div class="card-actions">
+            <a class="button" href="./unit6/">Start Unit 6 Tutorial</a>
+          </div>
+        </article>
+        <article class="tutorial-card">
+          <div class="card-top">
+            <span class="status">Available now</span>
+            <span class="unit-number">Unit 7</span>
+          </div>
+          <h3>The Hardening Bench</h3>
+          <p class="description">Apply practical Windows security controls and evaluate how well a system is protected.</p>
+          <ul class="topic-list">
+            <li>Password and account policies</li>
+            <li>BitLocker and recovery keys</li>
+            <li>Windows Defender Firewall</li>
+            <li>Security configuration decisions</li>
+            <li>System-hardening audits</li>
+          </ul>
+          <div class="card-actions">
+            <a class="button" href="./unit7/">Start Unit 7 Tutorial</a>
+          </div>
+        </article>
+        <article class="tutorial-card">
+          <div class="card-top">
+            <span class="status">Available now</span>
+            <span class="unit-number">Unit 8</span>
+          </div>
+          <h3>The Script Forge</h3>
+          <p class="description">Develop practical PowerShell skills by discovering commands, building pipelines, and assembling scripts.</p>
+          <ul class="topic-list">
+            <li>PowerShell command discovery</li>
+            <li>Objects and pipelines</li>
+            <li>Script assembly</li>
+            <li>Reading and reviewing code</li>
+            <li>PowerShell knowledge check</li>
+          </ul>
+          <div class="card-actions">
+            <a class="button" href="./unit8/">Start Unit 8 Tutorial</a>
+          </div>
+        </article>
+        <article class="tutorial-card">
+          <div class="card-top">
+            <span class="status">Available now</span>
+            <span class="unit-number">Unit 9</span>
+          </div>
+          <h3>The Triage Desk</h3>
+          <p class="description">Practice structured troubleshooting with event logs, repair tools, Safe Mode, recovery options, and case analysis.</p>
+          <ul class="topic-list">
+            <li>Event Viewer filtering</li>
+            <li>Reliability Monitor</li>
+            <li>SFC and DISM repair sequence</li>
+            <li>Safe Mode and BitLocker recovery</li>
+            <li>Troubleshooting case files</li>
+          </ul>
+          <div class="card-actions">
+            <a class="button" href="./unit9/">Start Unit 9 Tutorial</a>
+          </div>
+        </article>
+        <article class="tutorial-card">
+          <div class="card-top">
+            <span class="status">Available now</span>
+            <span class="unit-number">Unit 10</span>
+          </div>
+          <h3>The Gauntlet</h3>
+          <p class="description">Bring the entire course together through baseline comparison, rapid review, reporting, and capstone-style cases.</p>
+          <ul class="topic-list">
+            <li>Baseline report comparison</li>
+            <li>Full-course lightning round</li>
+            <li>Incident report construction</li>
+            <li>Cross-course troubleshooting cases</li>
+            <li>Capstone preparation</li>
+          </ul>
+          <div class="card-actions">
+            <a class="button" href="./unit10/">Start Unit 10 Tutorial</a>
+          </div>
         </article>
       </div>
 
       <div class="help-note">
         <strong>Having trouble?</strong>
         Open the tutorial in a new browser tab and make sure JavaScript is enabled.
+        The repository folders should be named <code>unit1</code> through <code>unit10</code>,
+        with an <code>index.html</code> file inside each folder.
       </div>
     </section>
   </main>
