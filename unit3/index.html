@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit 3: File and Folder Management – Interactive Tutorial</title>
+<style>
+  :root {
+    --accent:    #3B5BDB;
+    --accent-d:  #2F4AC7;
+    --accent-l:  #EEF2FF;
+    --dark:      #1E293B;
+    --mid:       #475569;
+    --muted:     #94A3B8;
+    --bg:        #F8FAFF;
+    --white:     #FFFFFF;
+    --green:     #16A34A;
+    --green-l:   #F0FDF4;
+    --red:       #DC2626;
+    --red-l:     #FEF2F2;
+    --gold:      #D97706;
+    --gold-l:    #FFFBEB;
+    --term-bg:   #0F172A;
+    --term-blue: #7DD3FC;
+    --term-pur:  #C084FC;
+    --term-gray: #64748B;
+    --border:    #E2E8F0;
+    --radius:    8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Shell chrome ──────────────────────────────────── */
+  .shell {
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--white);
+    min-height: 100vh;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  .topbar {
+    background: var(--dark);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid var(--accent);
+  }
+  .topbar-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+  }
+  .topbar-title {
+    color: var(--muted);
+    font-size: 13px;
+    margin-left: 6px;
+    font-family: "Courier New", monospace;
+  }
+  .topbar-unit {
+    margin-left: auto;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: .05em;
+  }
+
+  /* ── Progress bar ──────────────────────────────────── */
+  .progress-wrap {
+    background: var(--dark);
+    padding: 0 24px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: #334155;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width .4s ease;
+  }
+  .progress-label {
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  /* ── Navigation ────────────────────────────────────── */
+  .section-nav {
+    display: flex;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border);
+    background: var(--white);
+    gap: 2px;
+    padding: 0 16px;
+  }
+  .section-nav::-webkit-scrollbar { height: 3px; }
+  .section-nav::-webkit-scrollbar-thumb { background: var(--border); }
+  .nav-btn {
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    border: none;
+    background: none;
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: all .2s;
+  }
+  .nav-btn:hover { color: var(--accent); }
+  .nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .nav-btn.completed { color: var(--green); }
+  .nav-btn.completed::after { content: " ✓"; font-size: 11px; }
+
+  /* ── Content area ──────────────────────────────────── */
+  .content { padding: 32px 32px 48px; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .section-header {
+    margin-bottom: 28px;
+  }
+  .section-tag {
+    display: inline-block;
+    background: var(--accent-l);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .section-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--dark);
+    line-height: 1.3;
+  }
+  .section-header p {
+    margin-top: 8px;
+    color: var(--mid);
+    font-size: 15px;
+  }
+
+  /* ── Content blocks ────────────────────────────────── */
+  .prose { color: var(--dark); margin-bottom: 16px; line-height: 1.7; }
+  .prose strong { color: var(--accent-d); }
+  h2.sub { font-size: 18px; font-weight: 700; color: var(--dark); margin: 28px 0 12px; }
+  h3.sub { font-size: 15px; font-weight: 700; color: var(--mid); margin: 20px 0 8px; text-transform: uppercase; letter-spacing: .06em; }
+
+  ul.points, ol.steps {
+    padding-left: 20px;
+    margin-bottom: 16px;
+  }
+  ul.points li, ol.steps li {
+    margin-bottom: 6px;
+    color: var(--dark);
+    line-height: 1.6;
+  }
+  ul.points li::marker { color: var(--accent); }
+
+  /* callout */
+  .callout {
+    border-left: 4px solid var(--accent);
+    background: var(--accent-l);
+    padding: 14px 18px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin-bottom: 20px;
+  }
+  .callout.warn {
+    border-left-color: var(--gold);
+    background: var(--gold-l);
+  }
+  .callout.success {
+    border-left-color: var(--green);
+    background: var(--green-l);
+  }
+  .callout-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    margin-bottom: 4px;
+  }
+  .callout .callout-label { color: var(--accent); }
+  .callout.warn .callout-label { color: var(--gold); }
+  .callout.success .callout-label { color: var(--green); }
+  .callout p { font-size: 14px; color: var(--dark); line-height: 1.6; }
+
+  /* two-column comparison */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 600px) { .compare { grid-template-columns: 1fr; } }
+  .compare-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .compare-card-header {
+    background: var(--accent);
+    color: #fff;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .compare-card-header.alt { background: var(--accent-d); }
+  .compare-card-body {
+    padding: 14px;
+    font-size: 13px;
+    background: var(--white);
+  }
+  .compare-card-body li { margin-bottom: 7px; color: var(--dark); }
+  .compare-card-body li::marker { color: var(--accent); }
+
+  /* permission cards */
+  .perm-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 600px) { .perm-grid { grid-template-columns: 1fr 1fr; } }
+  .perm-card {
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .perm-card-top {
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .perm-card-body {
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--mid);
+    background: var(--white);
+    line-height: 1.5;
+  }
+
+  /* terminal */
+  .terminal {
+    background: var(--term-bg);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 20px;
+    font-family: "Courier New", "Consolas", monospace;
+    font-size: 13px;
+  }
+  .terminal-bar {
+    background: #1E293B;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #334155;
+  }
+  .terminal-bar span { color: var(--muted); font-size: 12px; }
+  .t-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .terminal-body { padding: 16px 20px; line-height: 1.8; }
+  .terminal-body .prompt { color: var(--term-blue); }
+  .terminal-body .prompt.ps { color: var(--term-pur); }
+  .terminal-body .out { color: #94A3B8; font-size: 12px; }
+  .terminal-body .comment { color: var(--term-gray); font-style: italic; }
+
+  /* ── Quiz ──────────────────────────────────────────── */
+  .quiz-wrap { display: flex; flex-direction: column; gap: 28px; }
+  .q-block {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .q-head {
+    background: var(--accent-l);
+    padding: 14px 18px;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--dark);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .q-num {
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .q-options { padding: 16px 18px; display: flex; flex-direction: column; gap: 9px; }
+  .q-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all .15s;
+    background: var(--white);
+  }
+  .q-option:hover { border-color: var(--accent); background: var(--accent-l); }
+  .q-option.correct { border-color: var(--green); background: var(--green-l); }
+  .q-option.wrong { border-color: var(--red); background: var(--red-l); }
+  .q-option.revealed-correct { border-color: var(--green); background: var(--green-l); }
+  .q-radio {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all .15s;
+  }
+  .q-option.correct .q-radio { border-color: var(--green); background: var(--green); }
+  .q-option.wrong .q-radio { border-color: var(--red); background: var(--red); }
+  .q-option.revealed-correct .q-radio { border-color: var(--green); background: var(--green); }
+  .q-option span { font-size: 14px; line-height: 1.5; }
+  .q-feedback {
+    padding: 10px 18px 14px;
+    font-size: 13px;
+    display: none;
+    border-top: 1px solid var(--border);
+  }
+  .q-feedback.show { display: block; }
+  .q-feedback.ok { color: var(--green); background: var(--green-l); }
+  .q-feedback.no { color: var(--red); background: var(--red-l); }
+
+  /* tf question */
+  .tf-row { display: flex; gap: 10px; margin-top: 12px; }
+  .tf-btn {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--white);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all .15s;
+    color: var(--dark);
+  }
+  .tf-btn:hover { border-color: var(--accent); background: var(--accent-l); }
+  .tf-btn.correct { border-color: var(--green); background: var(--green-l); color: var(--green); }
+  .tf-btn.wrong { border-color: var(--red); background: var(--red-l); color: var(--red); }
+  .tf-btn.revealed { border-color: var(--green); background: var(--green-l); color: var(--green); }
+
+  /* ── Score panel ───────────────────────────────────── */
+  .score-panel {
+    background: var(--dark);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 28px;
+    text-align: center;
+    margin-top: 32px;
+    display: none;
+  }
+  .score-panel.show { display: block; }
+  .score-big { font-size: 52px; font-weight: 800; color: var(--accent); }
+  .score-sub { color: var(--muted); margin-top: 6px; }
+
+  /* ── Buttons ───────────────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all .15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-d); }
+  .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--mid); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 36px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  /* ── Drag-drop explorer mockup ──────────────────────── */
+  .explorer-demo {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 20px;
+    user-select: none;
+  }
+  .explorer-titlebar {
+    background: #E2E8F0;
+    padding: 6px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--mid);
+  }
+  .explorer-ribbon {
+    background: var(--accent-l);
+    padding: 6px 14px;
+    display: flex;
+    gap: 14px;
+    font-size: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .explorer-ribbon span { color: var(--accent); cursor: pointer; font-weight: 600; }
+  .explorer-body {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+  }
+  .explorer-nav {
+    border-right: 1px solid var(--border);
+    padding: 10px 0;
+    background: #F1F5F9;
+  }
+  .explorer-nav-item {
+    padding: 5px 16px;
+    font-size: 12px;
+    color: var(--mid);
+    cursor: pointer;
+    transition: background .1s;
+  }
+  .explorer-nav-item:hover { background: var(--accent-l); color: var(--accent); }
+  .explorer-nav-item.selected { background: var(--accent-l); color: var(--accent); font-weight: 600; }
+  .explorer-nav-section {
+    padding: 8px 16px 3px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .explorer-content {
+    padding: 12px;
+    min-height: 180px;
+    background: var(--white);
+  }
+  .explorer-files {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .explorer-file {
+    width: 80px;
+    text-align: center;
+    padding: 8px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background .1s;
+    font-size: 11px;
+    color: var(--dark);
+  }
+  .explorer-file:hover { background: var(--accent-l); }
+  .explorer-file .icon { font-size: 24px; display: block; margin-bottom: 4px; }
+
+  /* label chip */
+  .chip {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 20px;
+  }
+  .chip.green { background: var(--green); }
+  .chip.gold { background: var(--gold); }
+
+  /* ── Shortcut practice ──────────────────────────────── */
+  .shortcut-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 16px;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+  .kbd {
+    background: var(--dark);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .shortcut-desc { font-size: 13px; color: var(--mid); }
+
+  code.inline {
+    background: var(--accent-l);
+    color: var(--accent-d);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: "Courier New", monospace;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-dot t-dot" style="background:#EF4444"></div>
+    <div class="topbar-dot t-dot" style="background:#F59E0B"></div>
+    <div class="topbar-dot t-dot" style="background:#22C55E"></div>
+    <span class="topbar-title">NOS130 — Unit 3: File and Folder Management</span>
+    <div class="topbar-unit">UNIT 3</div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-label" id="progressLabel">Section 1 of 7</div>
+  </div>
+
+  <!-- Section nav -->
+  <nav class="section-nav" id="sectionNav">
+    <button class="nav-btn active" data-section="0">Intro</button>
+    <button class="nav-btn" data-section="1">File Explorer</button>
+    <button class="nav-btn" data-section="2">Quick Access</button>
+    <button class="nav-btn" data-section="3">NTFS Permissions</button>
+    <button class="nav-btn" data-section="4">Compression</button>
+    <button class="nav-btn" data-section="5">OneDrive</button>
+    <button class="nav-btn" data-section="6">CLI Tools</button>
+    <button class="nav-btn" data-section="7">Practice Quiz</button>
+  </nav>
+
+  <div class="content">
+
+    <!-- ── SECTION 0: INTRO ─────────────────────────────────── -->
+    <div class="section active" id="s0">
+      <div class="section-header">
+        <div class="section-tag">UNIT 3</div>
+        <h1>File and Folder Management</h1>
+        <p>A hands-on walkthrough of Windows 11 file management for NOS130.</p>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">HOW TO USE THIS TUTORIAL</div>
+        <p>Work through each section using the tabs above. Read the material, try the interactive elements, and complete the practice quiz at the end. Your quiz score is tracked for this session only — nothing is submitted automatically.</p>
+      </div>
+
+      <h2 class="sub">What You Will Learn</h2>
+      <div class="compare">
+        <div class="compare-card">
+          <div class="compare-card-header">Topics Covered</div>
+          <div class="compare-card-body">
+            <ul style="padding-left:18px">
+              <li>File Explorer layout and views</li>
+              <li>Quick Access and Libraries</li>
+              <li>NTFS permissions and inheritance</li>
+              <li>ZIP and NTFS compression</li>
+              <li>OneDrive Files On-Demand</li>
+              <li>cmd and PowerShell file commands</li>
+            </ul>
+          </div>
+        </div>
+        <div class="compare-card">
+          <div class="compare-card-header alt">MD-102 Alignment</div>
+          <div class="compare-card-body">
+            <ul style="padding-left:18px">
+              <li>Configure file access and permissions</li>
+              <li>Manage local and cloud storage</li>
+              <li>Automate common tasks with PowerShell</li>
+              <li>Support end users with file management issues</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <span></span>
+        <button class="btn btn-primary" onclick="goTo(1)">Start: File Explorer →</button>
+      </div>
+    </div>
+
+    <!-- ── SECTION 1: FILE EXPLORER ─────────────────────────── -->
+    <div class="section" id="s1">
+      <div class="section-header">
+        <div class="section-tag">SECTION 1</div>
+        <h1>File Explorer</h1>
+        <p>Your primary interface for navigating the Windows file system.</p>
+      </div>
+
+      <h2 class="sub">The Key Regions</h2>
+      <p class="prose">File Explorer is divided into four main regions. Knowing each one by name is essential for following IT documentation and supporting users.</p>
+
+      <div class="explorer-demo">
+        <div class="explorer-titlebar">
+          <span style="color:#EF4444;font-size:16px">●</span>
+          <span style="color:#F59E0B;font-size:16px">●</span>
+          <span style="color:#22C55E;font-size:16px">●</span>
+          <span style="margin-left:8px">File Explorer — This PC</span>
+        </div>
+        <div class="explorer-ribbon">
+          <span>New</span><span>Sort</span><span>View</span><span>Options</span>
+        </div>
+        <div class="explorer-body">
+          <div class="explorer-nav">
+            <div class="explorer-nav-section">Quick Access</div>
+            <div class="explorer-nav-item selected">📌 Desktop</div>
+            <div class="explorer-nav-item">📌 Downloads</div>
+            <div class="explorer-nav-section">OneDrive</div>
+            <div class="explorer-nav-item">☁️ Personal</div>
+            <div class="explorer-nav-section">This PC</div>
+            <div class="explorer-nav-item">💻 Local Disk (C:)</div>
+            <div class="explorer-nav-item">💾 Drive (D:)</div>
+          </div>
+          <div class="explorer-content">
+            <div class="explorer-files">
+              <div class="explorer-file"><span class="icon">📁</span>Documents</div>
+              <div class="explorer-file"><span class="icon">📁</span>Downloads</div>
+              <div class="explorer-file"><span class="icon">📁</span>Pictures</div>
+              <div class="explorer-file"><span class="icon">📁</span>Videos</div>
+              <div class="explorer-file"><span class="icon">📄</span>report.txt</div>
+              <div class="explorer-file"><span class="icon">📄</span>notes.txt</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="compare-card">
+          <div class="compare-card-header">Navigation Pane (left side)</div>
+          <div class="compare-card-body">
+            <ul style="padding-left:16px">
+              <li>Shows Quick Access at the top</li>
+              <li>OneDrive (if signed in)</li>
+              <li>This PC for local drives</li>
+              <li>Network locations if connected</li>
+            </ul>
+          </div>
+        </div>
+        <div class="compare-card">
+          <div class="compare-card-header alt">Content Area (right side)</div>
+          <div class="compare-card-body">
+            <ul style="padding-left:16px">
+              <li>Shows files and folders for current location</li>
+              <li>View can be changed (Details, Icons, List)</li>
+              <li>Right-click here to create new items</li>
+              <li>Click column headers to sort (Details view)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="sub">Essential Keyboard Shortcuts</h2>
+      <div class="shortcut-grid">
+        <code class="kbd">Win + E</code><div class="shortcut-desc">Open File Explorer</div>
+        <code class="kbd">Ctrl + Shift + N</code><div class="shortcut-desc">Create a new folder</div>
+        <code class="kbd">Alt + ↑</code><div class="shortcut-desc">Go up one folder level</div>
+        <code class="kbd">Alt + ← / →</code><div class="shortcut-desc">Go back / forward</div>
+        <code class="kbd">F2</code><div class="shortcut-desc">Rename the selected item</div>
+        <code class="kbd">F5</code><div class="shortcut-desc">Refresh the current view</div>
+        <code class="kbd">Ctrl + L</code><div class="shortcut-desc">Focus the address bar (type a path)</div>
+        <code class="kbd">Ctrl + F</code><div class="shortcut-desc">Open the search box</div>
+      </div>
+
+      <h2 class="sub">Choosing the Right View</h2>
+      <p class="prose">Right-click an empty area in File Explorer and choose View, or use the View button in the ribbon. Here is when to use each option:</p>
+      <ul class="points">
+        <li><strong>Details</strong> — Best for IT work. Shows name, date, type, and size in sortable columns.</li>
+        <li><strong>Large Icons</strong> — Best for photo and media folders where thumbnails matter.</li>
+        <li><strong>List</strong> — Compact. Useful when you need to scan hundreds of files quickly.</li>
+        <li><strong>Content</strong> — Shows a text preview snippet next to each file. Useful for document-heavy folders.</li>
+      </ul>
+
+      <div class="callout warn">
+        <div class="callout-label">TIP</div>
+        <p>In Details view, click any column header to sort by that field. Click again to reverse the sort order. Shift-click a second column to add a secondary sort.</p>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-secondary" onclick="goTo(0)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(2)">Quick Access →</button>
+      </div>
+    </div>
+
+    <!-- ── SECTION 2: QUICK ACCESS ───────────────────────────── -->
+    <div class="section" id="s2">
+      <div class="section-header">
+        <div class="section-tag">SECTION 2</div>
+        <h1>Quick Access and Libraries</h1>
+        <p>Two different tools for organizing how you navigate to files.</p>
+      </div>
+
+      <div class="compare">
+        <div class="compare-card">
+          <div class="compare-card-header">Quick Access</div>
+          <div class="compare-card-body">
+            <ul style="padding-left:16px">
+              <li>Appears at the top of the navigation pane</li>
+              <li>Auto-populates with recent and frequent folders</li>
+              <li>Pin any folder: right-click → Pin to Quick Access</li>
+              <li>Unpin: right-click in nav pane → Unpin from Quick Access</li>
+              <li>Best for: personal shortcuts to your most-used locations</li>
+            </ul>
+          </div>
+        </div>
+        <div class="compare-card">
+          <div class="compare-card-header alt">Libraries</div>
+          <div class="compare-card-body">
+            <ul style="padding-left:16px">
+              <li>Hidden by default — enable via View → Navigation pane</li>
+              <li>Virtual containers aggregating multiple physical folders</li>
+              <li>Add a folder: right-click → Include in library</li>
+              <li>Default libraries: Documents, Music, Pictures, Videos</li>
+              <li>Best for: viewing files from multiple locations in one place</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="sub">When to Use Each One</h2>
+      <ul class="points">
+        <li><strong>Quick Access</strong> is personal and immediate — think of it as your personal shortcuts panel. Use it for folders you navigate to multiple times a day.</li>
+        <li><strong>Libraries</strong> are more powerful when content lives in multiple places. A Library called "Project X" could show files from a local folder, a network share, and an external drive all at once — without moving anything.</li>
+      </ul>
+
+      <div class="callout">
+        <div class="callout-label">HOW TO ENABLE LIBRARIES</div>
+        <p>In File Explorer, click <strong>View</strong> in the ribbon → <strong>Show</strong> → <strong>Navigation pane</strong> → check <strong>Show libraries</strong>. Libraries will then appear in the left navigation pane.</p>
+      </div>
+
+      <h2 class="sub">Quick Check</h2>
+      <p class="prose">Match the scenario to the right tool by clicking your answer:</p>
+
+      <div id="matchQuiz" style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+        <div class="q-block" id="mq1">
+          <div class="q-head"><div class="q-num">1</div><div>You have a folder called Projects that you open ten times a day. You want it always visible in the nav pane with one click.</div></div>
+          <div class="q-options" id="mq1-opts">
+            <div class="q-option" onclick="checkMatch('mq1',this,true)"><div class="q-radio"></div><span>Quick Access</span></div>
+            <div class="q-option" onclick="checkMatch('mq1',this,false)"><div class="q-radio"></div><span>Library</span></div>
+          </div>
+          <div class="q-feedback" id="mq1-fb"></div>
+        </div>
+        <div class="q-block" id="mq2">
+          <div class="q-head"><div class="q-num">2</div><div>Your team's project files are split across C:\Work, \\Server\Shared, and an external drive. You want to see them all in one view.</div></div>
+          <div class="q-options" id="mq2-opts">
+            <div class="q-option" onclick="checkMatch('mq2',this,false)"><div class="q-radio"></div><span>Quick Access</span></div>
+            <div class="q-option" onclick="checkMatch('mq2',this,true)"><div class="q-radio"></div><span>Library</span></div>
+          </div>
+          <div class="q-feedback" id="mq2-fb"></div>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-secondary" onclick="goTo(1)">← File Explorer</button>
+        <button class="btn btn-primary" onclick="goTo(3)">NTFS Permissions →</button>
+      </div>
+    </div>
+
+    <!-- ── SECTION 3: NTFS PERMISSIONS ──────────────────────── -->
+    <div class="section" id="s3">
+      <div class="section-header">
+        <div class="section-tag">SECTION 3</div>
+        <h1>NTFS Permissions</h1>
+        <p>Controlling who can read, write, and modify files at the file system level.</p>
+      </div>
+
+      <h2 class="sub">The Six Standard Permission Levels</h2>
+      <div class="perm-grid">
+        <div class="perm-card"><div class="perm-card-top" style="background:#EF4444">Full Control</div><div class="perm-card-body">Read, write, delete, change permissions, take ownership</div></div>
+        <div class="perm-card"><div class="perm-card-top" style="background:#F59E0B">Modify</div><div class="perm-card-body">Read and write files; delete files and subfolders</div></div>
+        <div class="perm-card"><div class="perm-card-top" style="background:#22C55E">Read & Execute</div><div class="perm-card-body">View contents and run programs; no changes permitted</div></div>
+        <div class="perm-card"><div class="perm-card-top" style="background:#38BDF8;color:#0F172A">Read</div><div class="perm-card-body">Open and view files only; cannot modify anything</div></div>
+        <div class="perm-card"><div class="perm-card-top" style="background:#A78BFA">Write</div><div class="perm-card-body">Add files and subfolders; cannot read existing content</div></div>
+        <div class="perm-card"><div class="perm-card-top" style="background:#94A3B8;color:#0F172A">Special</div><div class="perm-card-body">Fine-grained combination of individual permission flags</div></div>
+      </div>
+
+      <h2 class="sub">How to Set Permissions</h2>
+      <ol class="steps">
+        <li>Right-click the file or folder → <strong>Properties</strong></li>
+        <li>Click the <strong>Security</strong> tab</li>
+        <li>Click <strong>Edit</strong> to open the permission dialog</li>
+        <li>Click <strong>Add</strong> to search for a user or group, or select an existing entry</li>
+        <li>Check <strong>Allow</strong> or <strong>Deny</strong> boxes for each permission level</li>
+        <li>Click <strong>Apply</strong>, then <strong>OK</strong></li>
+      </ol>
+
+      <div class="callout warn">
+        <div class="callout-label">ALLOW vs DENY</div>
+        <p><strong>Deny always overrides Allow.</strong> If a user is in two groups and one has Allow Read while the other has Deny Read, the user cannot read the file. Use Deny carefully — in most cases, you manage access by adding or removing Allow permissions instead.</p>
+      </div>
+
+      <h2 class="sub">Inheritance</h2>
+      <p class="prose">By default, subfolders and files inherit permissions from their parent folder. This means if you grant Read to a group on a top-level folder, everything inside it gets Read automatically.</p>
+      <p class="prose">To give a subfolder its own independent rules, open its <strong>Advanced Security Settings</strong> and click <strong>Disable Inheritance</strong>. Choose to convert the inherited permissions to explicit ones, then modify as needed.</p>
+
+      <div class="compare">
+        <div class="compare-card">
+          <div class="compare-card-header" style="background:#16A34A">Inheritance ON (default)</div>
+          <div class="compare-card-body" style="background:#F0FDF4">
+            <p style="color:#166534;font-size:13px">Permissions flow from parent to all children automatically. Changes at the parent level propagate down. Easiest to maintain for large folder structures.</p>
+          </div>
+        </div>
+        <div class="compare-card">
+          <div class="compare-card-header" style="background:#D97706">Inheritance OFF (explicit)</div>
+          <div class="compare-card-body" style="background:#FFFBEB">
+            <p style="color:#92400E;font-size:13px">Folder has its own independent permission set. Parent changes do not affect it. Required when stricter or different rules are needed for a specific subfolder.</p>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="sub">Quick Check: Allow or Deny?</h2>
+      <div id="permQ" style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+        <div class="q-block">
+          <div class="q-head"><div class="q-num">?</div><div>A user is a member of "Managers" (Allow Modify) and "Auditors" (Deny Write). Can the user modify files in a shared folder?</div></div>
+          <div class="q-options" id="pq-opts">
+            <div class="q-option" onclick="checkPermQ(this,false)"><div class="q-radio"></div><span>Yes — Allow Modify takes precedence over Deny Write.</span></div>
+            <div class="q-option" onclick="checkPermQ(this,true)"><div class="q-radio"></div><span>No — Deny always overrides Allow, even from another group.</span></div>
+          </div>
+          <div class="q-feedback" id="pq-fb"></div>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-secondary" onclick="goTo(2)">← Quick Access</button>
+        <button class="btn btn-primary" onclick="goTo(4)">Compression →</button>
+      </div>
+    </div>
+
+    <!-- ── SECTION 4: COMPRESSION ────────────────────────────── -->
+    <div class="section" id="s4">
+      <div class="section-header">
+        <div class="section-tag">SECTION 4</div>
+        <h1>File Compression</h1>
+        <p>Two different compression tools built into Windows — and when to use each one.</p>
+      </div>
+
+      <div class="compare">
+        <div class="compare-card">
+          <div class="compare-card-header">ZIP Compression</div>
+          <div class="compare-card-body">
+            <ul style="padding-left:16px">
+              <li>Right-click → Compress to ZIP file</li>
+              <li>Creates a portable <code class="inline">.zip</code> archive</li>
+              <li>Cross-platform: works on Mac, Linux, all Windows versions</li>
+              <li>Extract with double-click or right-click → Extract All</li>
+              <li>No encryption by default (use 7-Zip for passwords)</li>
+              <li><strong>Best for:</strong> sharing or emailing collections of files</li>
+            </ul>
+          </div>
+        </div>
+        <div class="compare-card">
+          <div class="compare-card-header alt">NTFS Compression</div>
+          <div class="compare-card-body">
+            <ul style="padding-left:16px">
+              <li>Right-click → Properties → Advanced → Compress contents</li>
+              <li>Transparent — files open normally, no manual unzip needed</li>
+              <li>NTFS volumes only (not FAT32, exFAT)</li>
+              <li>Compressed items appear in <strong style="color:#3B5BDB">blue</strong> in File Explorer</li>
+              <li>Not recommended for JPG, MP4, or other pre-compressed files</li>
+              <li><strong>Best for:</strong> archiving large text-heavy files on the same drive</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="sub">Which Would You Choose?</h2>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+
+        <div class="q-block">
+          <div class="q-head"><div class="q-num">1</div><div>You need to email 30 Word documents to a client on a Mac. Which compression method should you use?</div></div>
+          <div class="q-options" id="cq1-opts">
+            <div class="q-option" onclick="checkComp('cq1',this,true)"><div class="q-radio"></div><span>ZIP — creates a portable archive that works cross-platform</span></div>
+            <div class="q-option" onclick="checkComp('cq1',this,false)"><div class="q-radio"></div><span>NTFS Compression — transparent and doesn't require extracting</span></div>
+          </div>
+          <div class="q-feedback" id="cq1-fb"></div>
+        </div>
+
+        <div class="q-block">
+          <div class="q-head"><div class="q-num">2</div><div>You have 20 GB of old server log files (.txt) on an NTFS drive that you rarely access but need to keep locally. Which method is better?</div></div>
+          <div class="q-options" id="cq2-opts">
+            <div class="q-option" onclick="checkComp('cq2',this,false)"><div class="q-radio"></div><span>ZIP — more portable and widely compatible</span></div>
+            <div class="q-option" onclick="checkComp('cq2',this,true)"><div class="q-radio"></div><span>NTFS Compression — transparent, stays on the same NTFS volume, no manual extraction needed</span></div>
+          </div>
+          <div class="q-feedback" id="cq2-fb"></div>
+        </div>
+
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-secondary" onclick="goTo(3)">← NTFS Permissions</button>
+        <button class="btn btn-primary" onclick="goTo(5)">OneDrive →</button>
+      </div>
+    </div>
+
+    <!-- ── SECTION 5: ONEDRIVE ───────────────────────────────── -->
+    <div class="section" id="s5">
+      <div class="section-header">
+        <div class="section-tag">SECTION 5</div>
+        <h1>OneDrive Integration</h1>
+        <p>Cloud storage, sync, and the Files On-Demand feature.</p>
+      </div>
+
+      <h2 class="sub">The Three File States</h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px">
+        <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+          <div style="background:#0EA5E9;padding:10px 14px;font-size:13px;font-weight:700;color:#fff">☁️ Cloud Only</div>
+          <div style="padding:12px;font-size:13px;color:var(--dark)">
+            <ul style="padding-left:16px">
+              <li>Visible in File Explorer</li>
+              <li>Not stored locally</li>
+              <li>Downloads when opened</li>
+              <li>Shows cloud icon in Status column</li>
+            </ul>
+          </div>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+          <div style="background:#16A34A;padding:10px 14px;font-size:13px;font-weight:700;color:#fff">✅ Available Locally</div>
+          <div style="padding:12px;font-size:13px;color:var(--dark)">
+            <ul style="padding-left:16px">
+              <li>Downloaded to local drive</li>
+              <li>Available offline</li>
+              <li>Uses disk space</li>
+              <li>Shows green checkmark</li>
+            </ul>
+          </div>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+          <div style="background:#1D4ED8;padding:10px 14px;font-size:13px;font-weight:700;color:#fff">🔒 Always on Device</div>
+          <div style="padding:12px;font-size:13px;color:var(--dark)">
+            <ul style="padding-left:16px">
+              <li>Permanently local copy</li>
+              <li>Never auto-removed by OneDrive</li>
+              <li>Uses disk space permanently</li>
+              <li>Shows filled green circle</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="sub">Managing File States</h2>
+      <ul class="points">
+        <li>Right-click a cloud-only file → <strong>Always keep on this device</strong> to download it permanently.</li>
+        <li>Right-click a local file → <strong>Free up space</strong> to return it to cloud-only and reclaim disk space.</li>
+        <li>To see the Status column in File Explorer: right-click any column header in Details view → check <strong>Status</strong>.</li>
+      </ul>
+
+      <div class="callout">
+        <div class="callout-label">IT SUPPORT TIP</div>
+        <p>When a user says they are running out of disk space and OneDrive is enabled, check the Status column. If many files show green checkmarks (local), use <strong>Free up space</strong> on older files to move them back to cloud-only. This is often faster than uninstalling programs.</p>
+      </div>
+
+      <h2 class="sub">Quick Check</h2>
+      <div class="q-block" style="margin-bottom:24px">
+        <div class="q-head"><div class="q-num">?</div><div>A user opens a cloud-only OneDrive file on an airplane with no internet connection. What happens?</div></div>
+        <div class="q-options" id="odq-opts">
+          <div class="q-option" onclick="checkOD(this,false)"><div class="q-radio"></div><span>The file opens normally — it is cached by the operating system.</span></div>
+          <div class="q-option" onclick="checkOD(this,true)"><div class="q-radio"></div><span>The file cannot be opened — it needs an internet connection to download.</span></div>
+          <div class="q-option" onclick="checkOD(this,false)"><div class="q-radio"></div><span>OneDrive automatically switches to offline mode and opens the file anyway.</span></div>
+        </div>
+        <div class="q-feedback" id="odq-fb"></div>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-secondary" onclick="goTo(4)">← Compression</button>
+        <button class="btn btn-primary" onclick="goTo(6)">CLI Tools →</button>
+      </div>
+    </div>
+
+    <!-- ── SECTION 6: CLI ─────────────────────────────────────── -->
+    <div class="section" id="s6">
+      <div class="section-header">
+        <div class="section-tag">SECTION 6</div>
+        <h1>Command-Line File Operations</h1>
+        <p>Managing files from cmd.exe and PowerShell — side by side.</p>
+      </div>
+
+      <h2 class="sub">Command Prompt (cmd.exe)</h2>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="t-dot" style="background:#EF4444"></div>
+          <div class="t-dot" style="background:#F59E0B"></div>
+          <div class="t-dot" style="background:#22C55E"></div>
+          <span>cmd.exe — Command Prompt</span>
+        </div>
+        <div class="terminal-body">
+          <div><span class="prompt">C:\Users\Student&gt;</span> dir              <span class="comment">  &lt;-- list contents</span></div>
+          <div><span class="prompt">C:\Users\Student&gt;</span> cd Documents      <span class="comment">  &lt;-- change directory</span></div>
+          <div><span class="prompt">C:\Users\Student\Documents&gt;</span> mkdir Reports  <span class="comment">  &lt;-- new folder</span></div>
+          <div><span class="prompt">C:\Users\Student\Documents&gt;</span> copy file.txt D:\  <span class="comment">  &lt;-- copy file</span></div>
+          <div><span class="prompt">C:\Users\Student\Documents&gt;</span> move file.txt .\sub\  <span class="comment">  &lt;-- move file</span></div>
+          <div><span class="prompt">C:\Users\Student\Documents&gt;</span> ren old.txt new.txt  <span class="comment">  &lt;-- rename</span></div>
+          <div><span class="prompt">C:\Users\Student\Documents&gt;</span> del file.txt   <span class="comment">  &lt;-- delete</span></div>
+        </div>
+      </div>
+
+      <h2 class="sub">PowerShell</h2>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="t-dot" style="background:#EF4444"></div>
+          <div class="t-dot" style="background:#F59E0B"></div>
+          <div class="t-dot" style="background:#22C55E"></div>
+          <span style="color:#C084FC">Windows PowerShell</span>
+        </div>
+        <div class="terminal-body">
+          <div><span class="prompt ps">PS C:\Users\Student&gt;</span> Get-ChildItem        <span class="comment">  &lt;-- list contents</span></div>
+          <div><span class="prompt ps">PS C:\Users\Student&gt;</span> Set-Location .\Documents  <span class="comment">  &lt;-- change directory</span></div>
+          <div><span class="prompt ps">PS C:\&gt;</span> New-Item -ItemType Directory -Name Reports  <span class="comment">  &lt;-- new folder</span></div>
+          <div><span class="prompt ps">PS C:\&gt;</span> Copy-Item file.txt D:\   <span class="comment">  &lt;-- copy file</span></div>
+          <div><span class="prompt ps">PS C:\&gt;</span> Move-Item file.txt .\sub\  <span class="comment">  &lt;-- move file</span></div>
+          <div><span class="prompt ps">PS C:\&gt;</span> Rename-Item old.txt -NewName new.txt  <span class="comment">  &lt;-- rename</span></div>
+          <div><span class="prompt ps">PS C:\&gt;</span> Remove-Item file.txt   <span class="comment">  &lt;-- delete</span></div>
+          <div><span class="prompt ps">PS C:\&gt;</span> Get-ChildItem -Recurse  <span class="comment">  &lt;-- list all nested files</span></div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-label">ALIASES IN POWERSHELL</div>
+        <p>PowerShell includes aliases so that classic cmd commands work too: <code class="inline">dir</code>, <code class="inline">cd</code>, <code class="inline">copy</code>, <code class="inline">move</code>, <code class="inline">del</code>, <code class="inline">mkdir</code>. These are shortcuts to the underlying cmdlets. You can use either style in PowerShell.</p>
+      </div>
+
+      <h2 class="sub">Command Reference</h2>
+      <div style="overflow-x:auto;margin-bottom:24px">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="background:var(--accent);color:#fff">
+              <th style="padding:8px 12px;text-align:left">Task</th>
+              <th style="padding:8px 12px;text-align:left">cmd.exe</th>
+              <th style="padding:8px 12px;text-align:left">PowerShell cmdlet</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:var(--white)"><td style="padding:8px 12px;border-bottom:1px solid var(--border)">List files</td><td style="padding:8px 12px;border-bottom:1px solid var(--border)"><code class="inline">dir</code></td><td style="padding:8px 12px;border-bottom:1px solid var(--border)"><code class="inline">Get-ChildItem</code></td></tr>
+            <tr style="background:var(--bg)"><td style="padding:8px 12px;border-bottom:1px solid var(--border)">Change directory</td><td style="padding:8px 12px;border-bottom:1px solid var(--border)"><code class="inline">cd</code></td><td style="padding:8px 12px;border-bottom:1px solid var(--border)"><code class="inline">Set-Location</code></td></tr>
+            <tr style="background:var(--white)"><td style="padding:8px 12px;border-bottom:1px solid var(--border)">Create folder</td><td style="padding:8px 12px;border-bottom:1px solid var(--border)"><code class="inline">mkdir</code></td><td style="padding:8px 12px;border-bottom:1px solid var(--border)"><code class="inline">New-Item -ItemType Directory</code></td></tr>
+            <tr style="background:var(--bg)"><td style="padding:8px 12px;border-bottom:1px solid var(--border)">Copy file</td><td style="padding:8px 12px;border-bottom:1px solid var(--border)"><code class="inline">copy</code></td><td style="padding:8px 12px;border-bottom:1px solid var(--border)"><code class="inline">Copy-Item</code></td></tr>
+            <tr style="background:var(--white)"><td style="padding:8px 12px;border-bottom:1px solid var(--border)">Move file</td><td style="padding:8px 12px;border-bottom:1px solid var(--border)"><code class="inline">move</code></td><td style="padding:8px 12px;border-bottom:1px solid var(--border)"><code class="inline">Move-Item</code></td></tr>
+            <tr style="background:var(--bg)"><td style="padding:8px 12px;border-bottom:1px solid var(--border)">Rename file</td><td style="padding:8px 12px;border-bottom:1px solid var(--border)"><code class="inline">ren</code></td><td style="padding:8px 12px;border-bottom:1px solid var(--border)"><code class="inline">Rename-Item</code></td></tr>
+            <tr style="background:var(--white)"><td style="padding:8px 12px">Delete file</td><td style="padding:8px 12px"><code class="inline">del</code></td><td style="padding:8px 12px"><code class="inline">Remove-Item</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-secondary" onclick="goTo(5)">← OneDrive</button>
+        <button class="btn btn-primary" onclick="goTo(7)">Practice Quiz →</button>
+      </div>
+    </div>
+
+    <!-- ── SECTION 7: QUIZ ────────────────────────────────────── -->
+    <div class="section" id="s7">
+      <div class="section-header">
+        <div class="section-tag">PRACTICE QUIZ</div>
+        <h1>Unit 3 Practice Quiz</h1>
+        <p>10 questions covering all six topics. Click an answer to check it immediately.</p>
+      </div>
+
+      <div class="quiz-wrap" id="quizWrap">
+
+        <!-- Q1 -->
+        <div class="q-block">
+          <div class="q-head"><div class="q-num">1</div><div>Which File Explorer view shows file name, size, type, and date modified in sortable columns?</div></div>
+          <div class="q-options">
+            <div class="q-option" onclick="answerQ(this,false,'q1fb')"><div class="q-radio"></div><span>Large Icons</span></div>
+            <div class="q-option" onclick="answerQ(this,true,'q1fb')"><div class="q-radio"></div><span>Details</span></div>
+            <div class="q-option" onclick="answerQ(this,false,'q1fb')"><div class="q-radio"></div><span>Content</span></div>
+            <div class="q-option" onclick="answerQ(this,false,'q1fb')"><div class="q-radio"></div><span>List</span></div>
+          </div>
+          <div class="q-feedback" id="q1fb"></div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="q-block">
+          <div class="q-head"><div class="q-num">2</div><div>What keyboard shortcut creates a new folder in File Explorer?</div></div>
+          <div class="q-options">
+            <div class="q-option" onclick="answerQ(this,false,'q2fb')"><div class="q-radio"></div><span>Ctrl + N</span></div>
+            <div class="q-option" onclick="answerQ(this,false,'q2fb')"><div class="q-radio"></div><span>Alt + N</span></div>
+            <div class="q-option" onclick="answerQ(this,true,'q2fb')"><div class="q-radio"></div><span>Ctrl + Shift + N</span></div>
+            <div class="q-option" onclick="answerQ(this,false,'q2fb')"><div class="q-radio"></div><span>Win + N</span></div>
+          </div>
+          <div class="q-feedback" id="q2fb"></div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="q-block">
+          <div class="q-head"><div class="q-num">3</div><div>A Library in Windows 11 physically moves files from multiple locations into one folder on disk. True or False?</div></div>
+          <div class="tf-row">
+            <button class="tf-btn" onclick="tfAnswer(this,'q3fb',false)">True</button>
+            <button class="tf-btn" onclick="tfAnswer(this,'q3fb',true)">False</button>
+          </div>
+          <div class="q-feedback" id="q3fb"></div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="q-block">
+          <div class="q-head"><div class="q-num">4</div><div>Which NTFS permission level allows a user to read files and run programs but NOT make any changes?</div></div>
+          <div class="q-options">
+            <div class="q-option" onclick="answerQ(this,false,'q4fb')"><div class="q-radio"></div><span>Modify</span></div>
+            <div class="q-option" onclick="answerQ(this,false,'q4fb')"><div class="q-radio"></div><span>Write</span></div>
+            <div class="q-option" onclick="answerQ(this,true,'q4fb')"><div class="q-radio"></div><span>Read &amp; Execute</span></div>
+            <div class="q-option" onclick="answerQ(this,false,'q4fb')"><div class="q-radio"></div><span>Full Control</span></div>
+          </div>
+          <div class="q-feedback" id="q4fb"></div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="q-block">
+          <div class="q-head"><div class="q-num">5</div><div>Deny permissions in NTFS always override Allow permissions, even when Allow is granted through group membership. True or False?</div></div>
+          <div class="tf-row">
+            <button class="tf-btn" onclick="tfAnswer(this,'q5fb',true)">True</button>
+            <button class="tf-btn" onclick="tfAnswer(this,'q5fb',false)">False</button>
+          </div>
+          <div class="q-feedback" id="q5fb"></div>
+        </div>
+
+        <!-- Q6 -->
+        <div class="q-block">
+          <div class="q-head"><div class="q-num">6</div><div>You need to email a folder of Word documents to a client on a Mac. Which compression method should you use?</div></div>
+          <div class="q-options">
+            <div class="q-option" onclick="answerQ(this,true,'q6fb')"><div class="q-radio"></div><span>ZIP — creates a portable archive that works cross-platform</span></div>
+            <div class="q-option" onclick="answerQ(this,false,'q6fb')"><div class="q-radio"></div><span>NTFS Compression — transparent and doesn't need extracting</span></div>
+          </div>
+          <div class="q-feedback" id="q6fb"></div>
+        </div>
+
+        <!-- Q7 -->
+        <div class="q-block">
+          <div class="q-head"><div class="q-num">7</div><div>NTFS compression works on USB drives formatted as FAT32. True or False?</div></div>
+          <div class="tf-row">
+            <button class="tf-btn" onclick="tfAnswer(this,'q7fb',false)">True</button>
+            <button class="tf-btn" onclick="tfAnswer(this,'q7fb',true)">False</button>
+          </div>
+          <div class="q-feedback" id="q7fb"></div>
+        </div>
+
+        <!-- Q8 -->
+        <div class="q-block">
+          <div class="q-head"><div class="q-num">8</div><div>What does a cloud icon in the OneDrive Status column indicate in File Explorer?</div></div>
+          <div class="q-options">
+            <div class="q-option" onclick="answerQ(this,false,'q8fb')"><div class="q-radio"></div><span>The file is encrypted and stored securely</span></div>
+            <div class="q-option" onclick="answerQ(this,true,'q8fb')"><div class="q-radio"></div><span>The file exists only in the cloud and will be downloaded when opened</span></div>
+            <div class="q-option" onclick="answerQ(this,false,'q8fb')"><div class="q-radio"></div><span>The file has been deleted from the local drive</span></div>
+          </div>
+          <div class="q-feedback" id="q8fb"></div>
+        </div>
+
+        <!-- Q9 -->
+        <div class="q-block">
+          <div class="q-head"><div class="q-num">9</div><div>Which PowerShell cmdlet lists all files and folders in a directory including all subdirectories?</div></div>
+          <div class="q-options">
+            <div class="q-option" onclick="answerQ(this,false,'q9fb')"><div class="q-radio"></div><span>Get-ChildItem</span></div>
+            <div class="q-option" onclick="answerQ(this,true,'q9fb')"><div class="q-radio"></div><span>Get-ChildItem -Recurse</span></div>
+            <div class="q-option" onclick="answerQ(this,false,'q9fb')"><div class="q-radio"></div><span>List-All -Deep</span></div>
+            <div class="q-option" onclick="answerQ(this,false,'q9fb')"><div class="q-radio"></div><span>Show-Files -Nested</span></div>
+          </div>
+          <div class="q-feedback" id="q9fb"></div>
+        </div>
+
+        <!-- Q10 -->
+        <div class="q-block">
+          <div class="q-head"><div class="q-num">10</div><div>What is the PowerShell cmdlet equivalent of the cmd command "ren"?</div></div>
+          <div class="q-options">
+            <div class="q-option" onclick="answerQ(this,false,'q10fb')"><div class="q-radio"></div><span>Set-Name</span></div>
+            <div class="q-option" onclick="answerQ(this,false,'q10fb')"><div class="q-radio"></div><span>Change-Item</span></div>
+            <div class="q-option" onclick="answerQ(this,true,'q10fb')"><div class="q-radio"></div><span>Rename-Item</span></div>
+            <div class="q-option" onclick="answerQ(this,false,'q10fb')"><div class="q-radio"></div><span>Move-Item</span></div>
+          </div>
+          <div class="q-feedback" id="q10fb"></div>
+        </div>
+
+      </div><!-- /quiz-wrap -->
+
+      <div class="score-panel" id="scorePanel">
+        <div class="score-big" id="scoreNum">–</div>
+        <div class="score-sub" id="scoreSub"></div>
+        <button class="btn btn-secondary" style="margin-top:18px;color:#fff;border-color:#475569" onclick="resetQuiz()">Try Again</button>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-secondary" onclick="goTo(6)">← CLI Tools</button>
+        <button class="btn btn-primary" onclick="goTo(0)">Back to Start</button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /shell -->
+
+<script>
+  const TOTAL_SECTIONS = 8;
+  let completedSections = new Set([0]);
+  let quizAnswers = {};
+  let quizTotal = 10;
+
+  // ── Navigation ───────────────────────────────────────────────
+  function goTo(idx) {
+    document.querySelectorAll('.section').forEach((s,i) => s.classList.toggle('active', i === idx));
+    document.querySelectorAll('.nav-btn').forEach((b,i) => {
+      b.classList.remove('active');
+      if (i === idx) b.classList.add('active');
+    });
+    completedSections.add(idx);
+    document.querySelectorAll('.nav-btn').forEach((b,i) => {
+      if (completedSections.has(i) && i !== idx) b.classList.add('completed');
+    });
+    updateProgress(idx);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateProgress(idx) {
+    const pct = Math.round(((idx + 1) / TOTAL_SECTIONS) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = `Section ${idx + 1} of ${TOTAL_SECTIONS}`;
+  }
+
+  // ── Inline check helpers ─────────────────────────────────────
+  function lockOptions(optsId) {
+    const opts = document.querySelectorAll(`#${optsId} .q-option`);
+    opts.forEach(o => { o.onclick = null; o.style.cursor = 'default'; });
+  }
+
+  function checkMatch(qid, el, correct) {
+    el.classList.add(correct ? 'correct' : 'wrong');
+    const fb = document.getElementById(qid + '-fb');
+    fb.classList.add('show', correct ? 'ok' : 'no');
+    fb.textContent = correct
+      ? '✓ Correct!'
+      : '✗ Not quite. Think about whether you need a single shortcut or an aggregated multi-location view.';
+    lockOptions(qid + '-opts');
+    if (!correct) {
+      document.querySelectorAll(`#${qid}-opts .q-option`).forEach(o => {
+        if (o !== el) o.classList.add('revealed-correct');
+      });
+    }
+  }
+
+  function checkPermQ(el, correct) {
+    el.classList.add(correct ? 'correct' : 'wrong');
+    const fb = document.getElementById('pq-fb');
+    fb.classList.add('show', correct ? 'ok' : 'no');
+    fb.textContent = correct
+      ? '✓ Correct. Deny always wins — even across different groups.'
+      : '✗ Not quite. Deny permissions override Allow regardless of how the Allow was granted.';
+    lockOptions('pq-opts');
+    if (!correct) {
+      document.querySelectorAll('#pq-opts .q-option').forEach(o => {
+        if (o !== el) o.classList.add('revealed-correct');
+      });
+    }
+  }
+
+  function checkComp(qid, el, correct) {
+    el.classList.add(correct ? 'correct' : 'wrong');
+    const fb = document.getElementById(qid + '-fb');
+    fb.classList.add('show', correct ? 'ok' : 'no');
+    fb.textContent = correct ? '✓ Correct!' : '✗ Not quite. Consider the platform compatibility and whether extraction is needed.';
+    lockOptions(qid + '-opts');
+    if (!correct) {
+      document.querySelectorAll(`#${qid}-opts .q-option`).forEach(o => {
+        if (o !== el) o.classList.add('revealed-correct');
+      });
+    }
+  }
+
+  function checkOD(el, correct) {
+    el.classList.add(correct ? 'correct' : 'wrong');
+    const fb = document.getElementById('odq-fb');
+    fb.classList.add('show', correct ? 'ok' : 'no');
+    fb.textContent = correct
+      ? '✓ Correct. Cloud-only files require an internet connection to open.'
+      : '✗ Not quite. Cloud-only files are just placeholders — they must be downloaded before use.';
+    lockOptions('odq-opts');
+    if (!correct) {
+      document.querySelectorAll('#odq-opts .q-option').forEach(o => {
+        if (o !== el) o.classList.add('revealed-correct');
+      });
+    }
+  }
+
+  // ── Scored Quiz ──────────────────────────────────────────────
+  const correctFeedback = {
+    q1fb: 'Details view shows the most information per file in sortable columns.',
+    q2fb: 'Ctrl + Shift + N creates a new folder without opening the ribbon.',
+    q3fb: 'False — Libraries are virtual containers. Files stay in their original physical locations.',
+    q4fb: 'Read & Execute allows viewing and running programs but no modifications.',
+    q5fb: 'True — Deny always overrides Allow, even from group membership.',
+    q6fb: 'ZIP creates a portable cross-platform archive. NTFS compression does not work on Mac.',
+    q7fb: 'False — NTFS compression only works on NTFS-formatted volumes, not FAT32.',
+    q8fb: 'The cloud icon means the file is cloud-only and not stored locally.',
+    q9fb: 'Get-ChildItem -Recurse traverses all subdirectories.',
+    q10fb: 'Rename-Item is the PowerShell equivalent of the cmd "ren" command.',
+  };
+  const wrongFeedback = {
+    q1fb: 'Details view is the correct answer. It shows name, size, type, and date in columns.',
+    q2fb: 'The correct shortcut is Ctrl + Shift + N.',
+    q3fb: 'False is correct. Libraries are virtual — they do not move files.',
+    q4fb: 'Read & Execute is the correct answer. Modify allows changes; Read does not allow running programs.',
+    q5fb: 'True is correct. Deny permissions always override Allow.',
+    q6fb: 'ZIP is correct. NTFS compression is volume-bound and cannot be shared cross-platform.',
+    q7fb: 'False is correct. NTFS compression requires an NTFS volume.',
+    q8fb: 'The cloud icon means the file is cloud-only — it will download when opened.',
+    q9fb: 'Get-ChildItem -Recurse is correct. The -Recurse flag traverses subdirectories.',
+    q10fb: 'Rename-Item is correct. Move-Item changes location, not name.',
+  };
+
+  function answerQ(el, correct, fbId) {
+    if (quizAnswers[fbId] !== undefined) return;
+    quizAnswers[fbId] = correct;
+    el.classList.add(correct ? 'correct' : 'wrong');
+    const fb = document.getElementById(fbId);
+    fb.classList.add('show', correct ? 'ok' : 'no');
+    fb.textContent = (correct ? '✓ ' : '✗ ') + (correct ? correctFeedback[fbId] : wrongFeedback[fbId]);
+    const siblings = el.parentElement.querySelectorAll('.q-option');
+    siblings.forEach(s => { s.onclick = null; s.style.cursor = 'default'; });
+    if (!correct) {
+      siblings.forEach(s => {
+        if (s !== el && !s.classList.contains('wrong')) s.classList.add('revealed-correct');
+      });
+    }
+    checkQuizComplete();
+  }
+
+  function tfAnswer(btn, fbId, isCorrect) {
+    if (quizAnswers[fbId] !== undefined) return;
+    quizAnswers[fbId] = isCorrect;
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    const fb = document.getElementById(fbId);
+    fb.classList.add('show', isCorrect ? 'ok' : 'no');
+    fb.textContent = (isCorrect ? '✓ ' : '✗ ') + (isCorrect ? correctFeedback[fbId] : wrongFeedback[fbId]);
+    const row = btn.parentElement;
+    row.querySelectorAll('.tf-btn').forEach(b => { b.onclick = null; b.style.cursor = 'default'; });
+    if (!isCorrect) {
+      row.querySelectorAll('.tf-btn').forEach(b => { if (b !== btn) b.classList.add('revealed'); });
+    }
+    checkQuizComplete();
+  }
+
+  function checkQuizComplete() {
+    if (Object.keys(quizAnswers).length < quizTotal) return;
+    const correct = Object.values(quizAnswers).filter(Boolean).length;
+    const panel = document.getElementById('scorePanel');
+    panel.classList.add('show');
+    document.getElementById('scoreNum').textContent = correct + ' / ' + quizTotal;
+    const pct = Math.round((correct / quizTotal) * 100);
+    let msg = pct >= 90 ? 'Outstanding — you are ready for the lab!'
+            : pct >= 70 ? 'Good work. Review any missed questions before the lab.'
+            : 'Keep reviewing — re-read the sections for any questions you missed.';
+    document.getElementById('scoreSub').textContent = pct + '% — ' + msg;
+    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function resetQuiz() {
+    quizAnswers = {};
+    document.querySelectorAll('.q-option').forEach(o => {
+      o.classList.remove('correct','wrong','revealed-correct');
+    });
+    document.querySelectorAll('.tf-btn').forEach(b => {
+      b.classList.remove('correct','wrong','revealed');
+    });
+    document.querySelectorAll('.q-feedback').forEach(f => {
+      f.classList.remove('show','ok','no');
+      f.textContent = '';
+    });
+    // Re-attach click handlers — reload is simplest
+    location.reload();
+  }
+
+  // Init
+  updateProgress(0);
+</script>
+</body>
+</html>

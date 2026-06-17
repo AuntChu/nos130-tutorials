@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOS130 Unit 8 - The Script Forge</title>
+<style>
+:root{
+  --bg:#0B1020; --panel:#121A33; --panel2:#0F172A; --line:#24304F;
+  --cy:#0891B2; --cy-dk:#0E7490; --cy-soft:#67E8F9;
+  --txt:#E2E8F0; --mut:#94A3B8; --grn:#4ADE80; --red:#F87171; --gold:#FBBF24;
+  --mono:'Consolas','Courier New',monospace; --sans:'Segoe UI',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.6;padding-bottom:60px}
+.wrap{max-width:980px;margin:0 auto;padding:0 18px}
+header{border-bottom:2px solid var(--cy-dk);padding:26px 0 18px;background:linear-gradient(180deg,#0D1730,var(--bg))}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:3px;color:var(--cy-soft)}
+h1{font-size:30px;margin-top:6px}
+h1 .accent{color:var(--cy)}
+.sub{color:var(--mut);margin-top:6px;font-size:15px}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
+nav button{background:var(--panel);border:1px solid var(--line);color:var(--mut);padding:8px 14px;border-radius:6px;cursor:pointer;font-family:var(--mono);font-size:12.5px}
+nav button.active{background:var(--cy-dk);border-color:var(--cy);color:#fff}
+section{display:none;animation:fade .25s}
+section.show{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h2{font-size:22px;margin:18px 0 10px;color:#fff}
+h2 .num{color:var(--cy);font-family:var(--mono);margin-right:8px}
+h3{font-size:16px;color:var(--cy-soft);margin:16px 0 8px}
+p{margin:0 0 12px;color:var(--txt)}
+p.mut{color:var(--mut)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:14px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;background:#1E293B;border:1px solid var(--line);color:var(--cy-soft);padding:2px 8px;border-radius:4px;margin-bottom:8px;letter-spacing:1px}
+.term{background:#05080F;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:14px 0}
+.term-bar{display:flex;align-items:center;gap:6px;background:#0D1426;padding:8px 12px;border-bottom:1px solid var(--line)}
+.dot{width:10px;height:10px;border-radius:50%}
+.d1{background:#F87171}.d2{background:#FBBF24}.d3{background:#34D399}
+.term-title{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-left:8px}
+.term-out{font-family:var(--mono);font-size:13px;padding:12px 14px;min-height:110px;max-height:340px;overflow-y:auto;white-space:pre-wrap;word-break:break-word}
+.term-out .cmd{color:var(--grn)}
+.term-out .dim{color:var(--mut)}
+.term-out .err{color:var(--red)}
+.term-out .ok{color:var(--grn)}
+.term-out .cyn{color:var(--cy-soft)}
+.term-in{display:flex;border-top:1px solid var(--line);background:#070B16}
+.term-in span{font-family:var(--mono);color:var(--cy-soft);padding:10px 0 10px 14px;font-size:13px}
+.term-in input{flex:1;background:transparent;border:none;outline:none;color:var(--txt);font-family:var(--mono);font-size:13px;padding:10px 14px 10px 8px}
+.btn{background:var(--cy-dk);border:1px solid var(--cy);color:#fff;padding:9px 16px;border-radius:6px;cursor:pointer;font-size:14px;font-family:var(--sans)}
+.btn:hover{background:var(--cy)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.pill-row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.pill{background:#1E293B;border:1px solid var(--line);color:var(--txt);padding:6px 12px;border-radius:20px;cursor:pointer;font-size:13px}
+.pill:hover{border-color:var(--cy)}
+.pill.sel{background:var(--cy-dk);border-color:var(--cy);color:#fff}
+.pill.right{background:#14532D;border-color:var(--grn);color:var(--grn)}
+.pill.wrong{background:#450A0A;border-color:var(--red);color:var(--red)}
+.stagebtns{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.stagebtns .pill{font-family:var(--mono);font-size:12px}
+.pipeview{font-family:var(--mono);font-size:13px;background:#0F172A;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:8px 0;color:var(--cy-soft);min-height:42px;word-break:break-all}
+.scriptbox{font-family:var(--mono);font-size:12.5px;background:#05080F;border:1px solid var(--line);border-radius:10px;padding:14px;line-height:2;overflow-x:auto}
+.scriptbox .k{color:var(--cy-soft)} .scriptbox .s{color:#FBBF24} .scriptbox .c{color:var(--mut)}
+.scriptbox select{background:#1E293B;border:1px solid var(--cy);color:#fff;font-family:var(--mono);font-size:12px;padding:2px 6px;border-radius:5px}
+.quiz-q{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0}
+.quiz-q .qt{font-weight:600;margin-bottom:10px}
+.opt{display:block;width:100%;text-align:left;background:#0F172A;border:1px solid var(--line);color:var(--txt);padding:9px 12px;border-radius:6px;margin:6px 0;cursor:pointer;font-size:14px}
+.opt:hover{border-color:var(--cy)}
+.opt.right{border-color:var(--grn);background:#0C2A1B;color:var(--grn)}
+.opt.wrong{border-color:var(--red);background:#2A0E0E;color:var(--red)}
+.fb{font-size:13px;margin-top:8px;display:none}
+.fb.show{display:block}
+.fb.good{color:var(--grn)} .fb.bad{color:var(--red)}
+.scorebar{position:fixed;bottom:0;left:0;right:0;background:#0D1426;border-top:1px solid var(--line);padding:10px 0;z-index:50}
+.scorebar .wrap{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:13px}
+.scorebar .pts{color:var(--gold)}
+.case-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.badge{font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:4px;letter-spacing:1px}
+.badge.open{background:#3B2204;color:var(--gold);border:1px solid var(--gold)}
+.badge.solved{background:#0C2A1B;color:var(--grn);border:1px solid var(--grn)}
+.snippet{background:#05080F;border:1px dashed var(--line);border-radius:8px;padding:12px 14px;font-family:var(--mono);font-size:12.5px;margin:10px 0;line-height:1.8;white-space:pre;overflow-x:auto;color:var(--txt)}
+.final{background:linear-gradient(135deg,#0E2238,#0F172A);border:1px solid var(--cy-dk);border-radius:12px;padding:22px;text-align:center;margin:16px 0}
+.final .big{font-size:42px;font-weight:800;color:var(--cy)}
+kbd{font-family:var(--mono);background:#1E293B;border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:12.5px;color:var(--cy-soft)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="kicker">NOS130 // UNIT 8 // WEEK 13</div>
+    <h1>The Script <span class="accent">Forge</span></h1>
+    <div class="sub">Drive a working PowerShell, build pipelines stage by stage, assemble the health check, and review code like the senior tech.</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav id="nav"></nav>
+
+  <!-- SECTION 1: BRIEFING -->
+  <section id="s0" class="show">
+    <h2><span class="num">01</span>Briefing</h2>
+    <p>Every command you typed this semester was rehearsal. This forge is where the rehearsal turns into the show: a simulated PowerShell that knows your course history, a pipeline you assemble piece by piece, the execution policy wall (you will hit it), and the health check script from lecture, built by your own choices.</p>
+    <div class="grid2">
+      <div class="card"><div class="tag">YOU WILL PRACTICE</div>
+        <p style="font-size:14px">The discovery trinity against a live prompt, with real Tab completion. Pipelines that grow one stage at a time. Filling in the health check script and fixing the policy that blocks it. Spotting the bug in four scripts that almost work.</p>
+      </div>
+      <div class="card"><div class="tag">HOW SCORING WORKS</div>
+        <p style="font-size:14px">Code Reviews: 8 points (4 scripts, bug + fix each). Knowledge Check: 8 points. 16 total, tracked in the bar below. 13 or better is scripter grade. Sections 2 through 4 are unscored practice; break things freely.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="tag">TERMINAL TIPS</div>
+      <p style="font-size:14px">The Section 2 terminal supports <kbd>Get-Command *word*</kbd>, <kbd>Get-Help &lt;cmdlet&gt; -Examples</kbd>, <kbd>Get-Process</kbd>, <kbd>Get-Process | Get-Member</kbd>, <kbd>Get-LocalUser</kbd>, <kbd>Get-BitLockerVolume</kbd>, <kbd>cls</kbd>, and <kbd>help</kbd>. And yes: <kbd>Tab</kbd> completes cmdlet names, exactly like the real thing. Try it first.</p>
+    </div>
+    <button class="btn" onclick="go(1)">Start: The Discovery Bench &rarr;</button>
+  </section>
+
+  <!-- SECTION 2: DISCOVERY BENCH -->
+  <section id="s1">
+    <h2><span class="num">02</span>The Discovery Bench</h2>
+    <p>Nobody memorizes PowerShell. Complete the four drills using only discovery. The checklist marks each as you go.</p>
+    <div class="pill-row">
+      <span class="pill" id="dr0">1. Get-Command *firewall*</span>
+      <span class="pill" id="dr1">2. Get-Help Test-NetConnection -Examples</span>
+      <span class="pill" id="dr2">3. Get-Process | Get-Member</span>
+      <span class="pill" id="dr3">4. Complete a cmdlet with Tab</span>
+    </div>
+    <div id="bench"></div>
+    <div class="card">
+      <div class="tag">WHY THIS MATTERS</div>
+      <p style="font-size:14px;margin:0" id="benchNote">Drill 3's output is the secret weapon: Get-Member just showed you that a process object has a CPU property and a Kill method. In Section 4 you will bet the whole script on a property you can only know exists because Get-Member told you.</p>
+    </div>
+    <button class="btn" onclick="go(2)">Next: The Pipeline Builder &rarr;</button>
+  </section>
+
+  <!-- SECTION 3: PIPELINE BUILDER -->
+  <section id="s2">
+    <h2><span class="num">03</span>The Pipeline Builder</h2>
+    <p>Click stages to build the lecture's pipeline. The output updates after every stage, so you can watch the question sharpen.</p>
+    <div class="card">
+      <div class="tag">CHALLENGE 1: THE FIVE HUNGRIEST</div>
+      <div class="stagebtns" id="p1btns"></div>
+      <div class="pipeview" id="p1view">PS&gt; _</div>
+      <div class="term"><div class="term-bar"><div class="dot d1"></div><div class="dot d2"></div><div class="dot d3"></div><span class="term-title">output</span></div>
+        <div class="term-out" id="p1out"><span class="dim">Add the first stage.</span></div>
+      </div>
+      <button class="btn" id="p1reset" onclick="p1Reset()">Reset</button>
+    </div>
+    <div class="card">
+      <div class="tag">CHALLENGE 2: FIND YOUR UNIT 7 WORK</div>
+      <p class="mut" style="font-size:13.5px">Hundreds of firewall rules exist. Build the pipeline that finds only yours.</p>
+      <div class="stagebtns" id="p2btns"></div>
+      <div class="pipeview" id="p2view">PS&gt; _</div>
+      <div class="term"><div class="term-bar"><div class="dot d1"></div><div class="dot d2"></div><div class="dot d3"></div><span class="term-title">output</span></div>
+        <div class="term-out" id="p2out"><span class="dim">Add the first stage.</span></div>
+      </div>
+      <button class="btn" onclick="p2Reset()">Reset</button>
+    </div>
+    <button class="btn" onclick="go(3)">Next: Script Assembly &rarr;</button>
+  </section>
+
+  <!-- SECTION 4: SCRIPT ASSEMBLY -->
+  <section id="s3">
+    <h2><span class="num">04</span>Script Assembly</h2>
+    <p>Get-HealthCheck.ps1 with five decisions removed. Make each choice, then run it. (Spoiler: the first run will not go how you hope, and that is the lesson.)</p>
+    <div class="scriptbox" id="scriptbox"></div>
+    <div style="margin:12px 0"><button class="btn" onclick="runScript()">.\Get-HealthCheck.ps1 &nbsp;&#9654;</button></div>
+    <div class="term"><div class="term-bar"><div class="dot d1"></div><div class="dot d2"></div><div class="dot d3"></div><span class="term-title">PowerShell - C:\Scripts</span></div>
+      <div class="term-out" id="runOut"><span class="dim">Make your five choices above, then run.</span></div>
+    </div>
+    <div class="card" id="policyCard" style="display:none">
+      <div class="tag">THE WALL</div>
+      <p style="font-size:14px">Execution policy blocked the script, exactly like the lab. Choose the fix:</p>
+      <div class="pill-row">
+        <button class="pill" onclick="fixPolicy(0,this)">Set-ExecutionPolicy Unrestricted -Scope LocalMachine</button>
+        <button class="pill" onclick="fixPolicy(1,this)">Set-ExecutionPolicy RemoteSigned -Scope CurrentUser</button>
+        <button class="pill" onclick="fixPolicy(2,this)">Disable Defender and retry</button>
+      </div>
+      <div class="fb" id="policyFb"></div>
+    </div>
+    <button class="btn" onclick="go(4)">Next: Code Review &rarr;</button>
+  </section>
+
+  <!-- SECTION 5: CODE REVIEW -->
+  <section id="s4">
+    <h2><span class="num">05</span>Code Review</h2>
+    <p>Four scripts from four (fictional) classmates, each with one flaw a senior tech would catch in review. Name the bug, name the fix. Two points per review.</p>
+    <div id="reviews"></div>
+    <button class="btn" onclick="go(5)">Next: Knowledge Check &rarr;</button>
+  </section>
+
+  <!-- SECTION 6: KNOWLEDGE CHECK -->
+  <section id="s5">
+    <h2><span class="num">06</span>Knowledge Check</h2>
+    <p>Eight questions, one point each. Instant feedback.</p>
+    <div id="quiz"></div>
+    <div class="final" id="finalBox" style="display:none">
+      <div class="tag">FINAL REPORT</div>
+      <div class="big" id="finalScore">0 / 16</div>
+      <p id="finalMsg" style="margin-top:8px"></p>
+      <p class="mut" style="font-size:13px;margin-top:6px">Reload the page to retry. The lab builds the real script on your real VM this week.</p>
+    </div>
+  </section>
+</div>
+
+<div class="scorebar"><div class="wrap"><span>NOS130 UNIT 8 // SCRIPT FORGE</span><span class="pts" id="scoreLive">SCORE: 0 / 16</span></div></div>
+
+<script>
+// ===== STATE =====
+var score = { reviews: {}, quiz: {}, total: function(){ var t=0,k; for(k in this.reviews) t+=this.reviews[k]; for(k in this.quiz) t+=this.quiz[k]; return t; } };
+function updScore(){ document.getElementById('scoreLive').textContent = 'SCORE: ' + score.total() + ' / 16'; }
+
+// ===== NAV =====
+var SECTIONS = ['Briefing','Discovery Bench','Pipeline Builder','Script Assembly','Code Review','Knowledge Check'];
+var nav = document.getElementById('nav');
+SECTIONS.forEach(function(name, i){
+  var b = document.createElement('button');
+  b.textContent = (i+1) + '. ' + name;
+  b.id = 'nav' + i;
+  b.onclick = function(){ go(i); };
+  nav.appendChild(b);
+});
+function go(i){
+  for (var j=0;j<6;j++){
+    document.getElementById('s'+j).classList.toggle('show', j===i);
+    document.getElementById('nav'+j).classList.toggle('active', j===i);
+  }
+  window.scrollTo(0,0);
+}
+go(0);
+
+// ===== SECTION 2: DISCOVERY BENCH (terminal simulator with Tab) =====
+var CMDLETS = ['Get-Command','Get-Help','Get-Member','Get-Process','Get-LocalUser','Get-LocalGroupMember','Get-NetIPConfiguration','Get-NetFirewallRule','Get-BitLockerVolume','Test-NetConnection','Set-ExecutionPolicy','Get-ExecutionPolicy','Start-Transcript','Stop-Transcript','Write-Host','Sort-Object','Select-Object','Where-Object','Get-Date','Get-Service','Stop-Process','New-Item'];
+var drills = [false,false,false,false];
+function markDrill(i){ if(!drills[i]){ drills[i]=true; document.getElementById('dr'+i).classList.add('right'); } }
+
+(function buildBench(){
+  var mount = document.getElementById('bench');
+  mount.innerHTML = '<div class="term"><div class="term-bar"><div class="dot d1"></div><div class="dot d2"></div><div class="dot d3"></div>' +
+    '<span class="term-title">Windows PowerShell - try Tab completion</span></div>' +
+    '<div class="term-out" id="benchOut"></div>' +
+    '<div class="term-in"><span>PS C:\\&gt;</span><input id="benchIn" autocomplete="off" spellcheck="false" placeholder="type a command, press Tab to complete, Enter to run"></div></div>';
+  var out = document.getElementById('benchOut');
+  var inp = document.getElementById('benchIn');
+  var tabMatches = [], tabIdx = -1, tabStem = '';
+
+  function print(html){ out.innerHTML += html; out.scrollTop = out.scrollHeight; }
+  print('<span class="dim">Windows PowerShell (simulated)\nType help for supported commands. Tab works.\n\n</span>');
+
+  var PROCS = [
+    ['msedge', 412.55],['Teams', 298.10],['OneDrive', 141.02],['explorer', 96.40],
+    ['SearchHost', 61.13],['Terminal', 22.87],['svchost', 18.40],['Notepad', 3.02]
+  ];
+  function procTable(list, cols){
+    var s = '';
+    if (cols){ s += ' Name           CPU\n ----           ---\n'; }
+    else { s += ' NPM(K)  CPU(s)  Id  ProcessName\n ------  ------  --  -----------\n'; }
+    list.forEach(function(p){
+      s += cols ? (' ' + p[0] + Array(15-p[0].length).join(' ') + p[1].toFixed(2) + '\n')
+                : (' 42     ' + p[1].toFixed(2) + '  1' + Math.floor(Math.random()*900+100) + '  ' + p[0] + '\n');
+    });
+    return s;
+  }
+
+  function run(raw){
+    var c = raw.trim();
+    if (!c) return;
+    print('<span class="cmd">PS C:\\&gt; ' + c.replace(/</g,'&lt;') + '</span>\n');
+    var lc = c.toLowerCase().replace(/\s+/g,' ');
+
+    if (lc === 'help'){
+      print('<span class="dim">Supported here: Get-Command *word* | Get-Help &lt;cmdlet&gt; [-Examples]\nGet-Process [| Get-Member] | Get-LocalUser | Get-BitLockerVolume\nGet-NetFirewallRule -DisplayName "LAB7*" | cls\n\n</span>');
+    }
+    else if (lc === 'cls' || lc === 'clear'){ out.innerHTML=''; }
+    else if (lc.indexOf('get-command') === 0){
+      var frag = (c.split(/\s+/)[1] || '*').replace(/\*/g,'').toLowerCase();
+      var hits = CMDLETS.filter(function(n){ return n.toLowerCase().indexOf(frag) >= 0; });
+      if (!hits.length){ print('<span class="dim">(no matches)\n\n</span>'); }
+      else {
+        print('<span class="cyn">CommandType  Name\n-----------  ----\n</span>' + hits.map(function(h){ return 'Cmdlet       ' + h; }).join('\n') + '\n\n');
+      }
+      if (frag === 'firewall') markDrill(0);
+    }
+    else if (lc.indexOf('get-help') === 0){
+      var target = c.split(/\s+/)[1] || '';
+      var ex = lc.indexOf('-examples') >= 0;
+      if (target.toLowerCase() === 'test-netconnection'){
+        if (ex){
+          print('<span class="cyn">NAME: Test-NetConnection -- EXAMPLES\n</span>  PS&gt; Test-NetConnection 192.168.1.1\n  PS&gt; Test-NetConnection bing.com -Port 443\n  PS&gt; Test-NetConnection 10.0.0.5 -TraceRoute\n<span class="dim">(working command lines, ready to adapt: the -Examples habit)\n\n</span>');
+          markDrill(1);
+        } else {
+          print('<span class="cyn">NAME\n  Test-NetConnection\nSYNOPSIS\n  Displays diagnostic information for a connection.\n</span><span class="dim">(tip: add -Examples for working command lines)\n\n</span>');
+        }
+      } else if (target){
+        print('<span class="cyn">NAME\n  ' + target + '\nSYNOPSIS\n  (summary help)\n</span><span class="dim">(this bench keeps full help for Test-NetConnection; try that one with -Examples)\n\n</span>');
+      } else {
+        print('<span class="dim">Usage: Get-Help &lt;cmdlet&gt; [-Examples]\n\n</span>');
+      }
+    }
+    else if (lc === 'get-process | get-member' || lc === 'get-process|get-member'){
+      print('<span class="cyn">   TypeName: System.Diagnostics.Process\n\nName        MemberType  Definition\n----        ----------  ----------\n</span>Kill        Method      void Kill()\nCPU         Property    double CPU {get;}\nId          Property    int Id {get;}\nProcessName Property    string ProcessName {get;}\nStartTime   Property    datetime StartTime {get;}\n<span class="dim">(every property is a question this object can answer)\n\n</span>');
+      markDrill(2);
+    }
+    else if (lc === 'get-process'){
+      print(procTable(PROCS, false) + '\n');
+    }
+    else if (lc === 'get-localuser'){
+      print('<span class="cyn">Name           Enabled\n----           -------\n</span>Administrator  False\nstudent        True\njchen          True\nmlopez         True\ntnguyen        True\n\n');
+    }
+    else if (lc.indexOf('get-bitlockervolume') === 0){
+      print('<span class="cyn">MountPoint  ProtectionStatus\n----------  ----------------\n</span>C:          On\n<span class="dim">(Unit 7, reporting in as an object)\n\n</span>');
+    }
+    else if (lc.indexOf('get-netfirewallrule') === 0){
+      if (lc.indexOf('lab7') >= 0){
+        print('<span class="cyn">DisplayName              Enabled\n-----------              -------\n</span>LAB7 Block ICMP 2026-06  False\nLAB7 Block SMB 2026-06   False\n<span class="dim">(the Unit 7 naming standard, paying off)\n\n</span>');
+      } else {
+        print('<span class="dim">(hundreds of rules... try filtering: Get-NetFirewallRule -DisplayName "LAB7*")\n\n</span>');
+      }
+    }
+    else {
+      print('<span class="err">The term \'' + c.split(/\s+/)[0].replace(/</g,'&lt;') + '\' is not recognized here. Type help.\n\n</span>');
+    }
+  }
+
+  inp.addEventListener('keydown', function(e){
+    if (e.key === 'Tab'){
+      e.preventDefault();
+      var v = inp.value;
+      var parts = v.split(/\s+/);
+      var last = parts[parts.length-1];
+      if (last.length < 2) return;
+      if (tabIdx === -1 || last.toLowerCase() !== tabMatches[tabIdx % Math.max(tabMatches.length,1)] && tabStem === ''){ tabStem = last; }
+      if (tabIdx === -1){
+        tabStem = last;
+        tabMatches = CMDLETS.filter(function(n){ return n.toLowerCase().indexOf(tabStem.toLowerCase()) === 0; });
+      }
+      if (!tabMatches.length){ tabIdx = -1; tabStem=''; return; }
+      tabIdx = (tabIdx + 1) % tabMatches.length;
+      parts[parts.length-1] = tabMatches[tabIdx];
+      inp.value = parts.join(' ');
+      markDrill(3);
+    } else if (e.key === 'Enter'){
+      run(inp.value); inp.value=''; tabIdx=-1; tabMatches=[]; tabStem='';
+    } else {
+      tabIdx=-1; tabMatches=[]; tabStem='';
+    }
+  });
+})();
+
+// ===== SECTION 3: PIPELINE BUILDERS =====
+function mkBuilder(btnRowId, viewId, outId, stages, renderFn){
+  var st = { idx: 0 };
+  var row = document.getElementById(btnRowId);
+  row.innerHTML = '';
+  stages.forEach(function(stage, i){
+    var b = document.createElement('button');
+    b.className = 'pill';
+    b.textContent = stage.label;
+    b.onclick = function(){
+      if (i !== st.idx){
+        b.classList.add('wrong');
+        setTimeout(function(){ b.classList.remove('wrong'); }, 700);
+        return;
+      }
+      b.classList.add('right');
+      st.idx++;
+      renderFn(st.idx, viewId, outId);
+    };
+    row.appendChild(b);
+  });
+  renderFn(0, viewId, outId);
+  return {
+    reset: function(){
+      st.idx = 0;
+      var pills = row.children;
+      for (var i=0;i<pills.length;i++) pills[i].classList.remove('right','wrong');
+      renderFn(0, viewId, outId);
+    }
+  };
+}
+
+var P1_STAGES = [
+  { label: 'Get-Process' },
+  { label: '| Sort-Object CPU -Descending' },
+  { label: '| Select-Object -First 5 Name, CPU' }
+];
+function p1Render(n, viewId, outId){
+  var parts = P1_STAGES.slice(0, n).map(function(s){ return s.label; });
+  document.getElementById(viewId).textContent = 'PS> ' + (parts.join(' ') || '_');
+  var out = document.getElementById(outId);
+  if (n === 0){ out.innerHTML = '<span class="dim">Add the first stage (stages only fit in one order; wrong picks bounce).</span>'; return; }
+  if (n === 1){
+    out.innerHTML = '<span class="cyn"> ProcessName     CPU(s)\n -----------     ------\n</span> svchost          18.40\n explorer         96.40\n msedge          412.55\n Notepad           3.02\n Teams           298.10\n OneDrive        141.02\n SearchHost       61.13\n Terminal         22.87\n<span class="dim"> ...every process, no order. Too much. Sort it.</span>';
+  } else if (n === 2){
+    out.innerHTML = '<span class="cyn"> ProcessName     CPU(s)\n -----------     ------\n</span> msedge          412.55\n Teams           298.10\n OneDrive        141.02\n explorer         96.40\n SearchHost       61.13\n Terminal         22.87\n svchost          18.40\n Notepad           3.02\n<span class="dim"> ...same objects, hungriest first. Now trim it.</span>';
+  } else {
+    out.innerHTML = '<span class="cyn"> Name            CPU\n ----            ---\n</span><span class="ok"> msedge       412.55\n Teams        298.10\n OneDrive     141.02\n explorer      96.40\n SearchHost    61.13</span>\n<span class="dim"> Read it like a sentence: get them, sort by hunger, keep five, show names.</span>';
+  }
+}
+var p1 = mkBuilder('p1btns', 'p1view', 'p1out', P1_STAGES, p1Render);
+function p1Reset(){ p1.reset(); }
+
+var P2_STAGES = [
+  { label: 'Get-NetFirewallRule' },
+  { label: '| Where-Object DisplayName -like "LAB7*"' },
+  { label: '| Select-Object DisplayName, Enabled' }
+];
+function p2Render(n, viewId, outId){
+  var parts = P2_STAGES.slice(0, n).map(function(s){ return s.label; });
+  document.getElementById(viewId).textContent = 'PS> ' + (parts.join(' ') || '_');
+  var out = document.getElementById(outId);
+  if (n === 0){ out.innerHTML = '<span class="dim">Add the first stage.</span>'; return; }
+  if (n === 1){
+    out.innerHTML = '<span class="dim"> Name: {a3f8c2...}  DisplayName: Core Networking - DHCP\n Name: {77b1e9...}  DisplayName: File and Printer Sharing (SMB-In)\n Name: {c91d44...}  DisplayName: Cortana\n ...547 more rules. Nobody scrolls this. Filter it.</span>';
+  } else if (n === 2){
+    out.innerHTML = '<span class="cyn"> (two rule objects matched, full detail blocks)\n</span><span class="dim"> Better. Now keep just the columns you care about.</span>';
+  } else {
+    out.innerHTML = '<span class="cyn"> DisplayName              Enabled\n -----------              -------\n</span><span class="ok"> LAB7 Block ICMP 2026-06  False\n LAB7 Block SMB 2026-06   False</span>\n<span class="dim"> Your Unit 7 work, found by name in a list of 550. Naming standards pay rent.</span>';
+  }
+}
+var p2 = mkBuilder('p2btns', 'p2view', 'p2out', P2_STAGES, p2Render);
+function p2Reset(){ p2.reset(); }
+
+// ===== SECTION 4: SCRIPT ASSEMBLY =====
+var BLANKS = [
+  { opts: ['targets','$targets','%targets%'], a: 1, why: 'PowerShell variables start with the dollar sign.' },
+  { opts: ['$t','"targets"','$targets'], a: 2, why: 'The loop walks the LIST, so the list variable goes after in.' },
+  { opts: ['Success','PingSucceeded','PingWorked'], a: 1, why: 'The property name Get-Member revealed: PingSucceeded.' },
+  { opts: ['print','Write-Host','echo.exe'], a: 1, why: 'Write-Host is the cmdlet that writes (and colors) console text.' },
+  { opts: ['Select-Object','Get-Member','Stop-Process'], a: 0, why: 'Select-Object keeps the properties you name.' }
+];
+var policyFixed = false;
+(function buildScript(){
+  function sel(i){
+    var o = BLANKS[i].opts.map(function(op, oi){ return '<option value="' + oi + '">' + op + '</option>'; }).join('');
+    return '<select id="blank' + i + '"><option value="-1">-- choose --</option>' + o + '</select>';
+  }
+  document.getElementById('scriptbox').innerHTML =
+    '<span class="c"># Get-HealthCheck.ps1 - NOS130 Unit 8</span><br>' +
+    sel(0) + ' = <span class="s">"192.168.1.1"</span>, <span class="s">"8.8.8.8"</span>, <span class="s">"192.168.1.250"</span><br>' +
+    '<span class="k">foreach</span> ($t <span class="k">in</span> ' + sel(1) + ') {<br>' +
+    '&nbsp;&nbsp;$r = Test-NetConnection $t<br>' +
+    '&nbsp;&nbsp;<span class="k">if</span> ($r.' + sel(2) + ') {<br>' +
+    '&nbsp;&nbsp;&nbsp;&nbsp;' + sel(3) + ' <span class="s">"$t reachable"</span> -ForegroundColor Green<br>' +
+    '&nbsp;&nbsp;} <span class="k">else</span> {<br>' +
+    '&nbsp;&nbsp;&nbsp;&nbsp;Write-Host <span class="s">"$t FAILED"</span> -ForegroundColor Red<br>' +
+    '&nbsp;&nbsp;}<br>' +
+    '}<br>' +
+    'Get-BitLockerVolume C: | ' + sel(4) + ' ProtectionStatus';
+})();
+function runScript(){
+  var out = document.getElementById('runOut');
+  for (var i=0;i<5;i++){
+    var v = parseInt(document.getElementById('blank'+i).value, 10);
+    if (v === -1){
+      out.innerHTML = '<span class="err">Choose all five blanks before running.</span>';
+      return;
+    }
+    if (v !== BLANKS[i].a){
+      out.innerHTML = '<span class="err">Blank ' + (i+1) + ' is wrong. Hint: ' + BLANKS[i].why + '</span>';
+      return;
+    }
+  }
+  if (!policyFixed){
+    out.innerHTML = '<span class="cmd">PS C:\\Scripts&gt; .\\Get-HealthCheck.ps1</span>\n' +
+      '<span class="err">.\\Get-HealthCheck.ps1 : File C:\\Scripts\\Get-HealthCheck.ps1 cannot be loaded\nbecause running scripts is disabled on this system.</span>\n' +
+      '<span class="dim">The wall. Every first-time scripter meets it. Fix it below.</span>';
+    document.getElementById('policyCard').style.display = 'block';
+    document.getElementById('policyCard').scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+  out.innerHTML = '<span class="cmd">PS C:\\Scripts&gt; .\\Get-HealthCheck.ps1</span>\n' +
+    '<span class="ok">192.168.1.1 reachable\n8.8.8.8 reachable</span>\n' +
+    '<span class="err">192.168.1.250 FAILED</span>\n\n' +
+    '<span class="cyn">MountPoint ProtectionStatus\n---------- ----------------\nC:                       On</span>\n\n' +
+    '<span class="dim">The fork worked: two green, one red, BitLocker reporting. Ninety minutes of week 10, four seconds. Now go write the real one in the lab.</span>';
+}
+function fixPolicy(i, el){
+  var fb = document.getElementById('policyFb');
+  if (i === 1){
+    el.classList.add('right');
+    policyFixed = true;
+    fb.className = 'fb show good';
+    fb.textContent = 'Correct: the standard setting, scoped to you alone (the Unit 7 least-privilege habit). Run the script again.';
+  } else if (i === 0){
+    el.classList.add('wrong');
+    fb.className = 'fb show bad';
+    fb.textContent = 'That would work, and that is the problem: Unrestricted machine-wide removes the guardrail for every account on the machine. Scope smaller, sign more.';
+  } else {
+    el.classList.add('wrong');
+    fb.className = 'fb show bad';
+    fb.textContent = 'Defender is not the wall here, and turning off your antivirus to run a script is how horror stories start. Read the error: it names execution policy.';
+  }
+}
+
+// ===== SECTION 5: CODE REVIEW =====
+var BUGS = ['Assignment (=) used where a comparison (-eq) belongs','No loop: the same command copy-pasted dozens of times','Parses text output instead of reading object properties','Execution policy opened machine-wide as Unrestricted','Missing .\\ when running the script','Recovery key saved on the encrypted drive'];
+var FIXES = ['Use -eq (or just test the property directly)','Put the targets in an array and use foreach','Use the cmdlet that returns objects and read the property','Use RemoteSigned with -Scope CurrentUser','Run it as .\\scriptname.ps1 from its folder','Move the key off the machine'];
+var REVIEWS = [
+  {
+    id:'A', title:'REVIEW A: The Fork That Always Passes',
+    snip:'$r = Test-NetConnection $t\nif ($r.PingSucceeded = $true) {\n    Write-Host "$t reachable"\n}',
+    note:'Symptom: every target reports reachable, even the dead ones.',
+    bug:0, fix:0,
+    debrief:'The single = ASSIGNS $true into the property expression instead of comparing, so the if is always true. This is exactly why PowerShell made comparison ugly on purpose: -eq cannot be typo\u2019d into an assignment. (Cleanest fix: if ($r.PingSucceeded) with no comparison at all.)'
+  },
+  {
+    id:'B', title:'REVIEW B: The Five-Hundred Line Script',
+    snip:'Test-NetConnection 192.168.1.1\nTest-NetConnection 192.168.1.2\nTest-NetConnection 192.168.1.3\n# ...47 more identical lines...\nTest-NetConnection 192.168.1.50',
+    note:'Symptom: adding one machine means editing the script. Removing one means hunting for its line.',
+    bug:1, fix:1,
+    debrief:'It runs, and it is still wrong. Fifty copies of one command is fifty places to typo and zero flexibility. An array plus foreach makes the fifty-machine script three lines, and machine fifty-one is a list edit, not a code edit.'
+  },
+  {
+    id:'C', title:'REVIEW C: The Fragile Slicer',
+    snip:'$text = ipconfig\n$line = $text[8]\n$gateway = $line.Substring(39)\nWrite-Host "Gateway is $gateway"',
+    note:'Symptom: worked on the author\u2019s machine. Broke on the next Windows update. Broke differently on a laptop with Wi-Fi.',
+    bug:2, fix:2,
+    debrief:'Counting lines and characters in text output is betting the script on formatting never changing, and formatting always changes. Get-NetIPConfiguration returns an object; the gateway is a named property, in every version, on every adapter. Objects beat text.'
+  },
+  {
+    id:'D', title:'REVIEW D: The Door Held Open',
+    snip:'# setup.ps1 - run once on each lab machine\nSet-ExecutionPolicy Unrestricted\n.\\Get-HealthCheck.ps1',
+    note:'Symptom: the script runs fine. The security review does not go fine.',
+    bug:3, fix:3,
+    debrief:'Unrestricted with no scope flag changes the whole machine for every account, permanently, to run one known local script. RemoteSigned at CurrentUser scope runs the same script while keeping the guardrail for downloaded code and other users. Scope smaller.'
+  }
+];
+var reviewsDiv = document.getElementById('reviews');
+REVIEWS.forEach(function(r, ri){
+  var card = document.createElement('div');
+  card.className = 'card';
+  var bugBtns = BUGS.map(function(b, i){ return '<button class="pill" onclick="pickBug(' + ri + ',' + i + ',this)">' + b + '</button>'; }).join('');
+  var fixBtns = FIXES.map(function(f, i){ return '<button class="pill" onclick="pickFixR(' + ri + ',' + i + ',this)">' + f + '</button>'; }).join('');
+  card.innerHTML =
+    '<div class="case-head"><h3 style="margin:0">' + r.title + '</h3><span class="badge open" id="rbadge' + ri + '">OPEN</span></div>' +
+    '<div class="snippet">' + r.snip.replace(/</g,'&lt;') + '</div>' +
+    '<p class="mut" style="font-size:13px">' + r.note + '</p>' +
+    '<p class="mut" style="font-size:13px;margin-bottom:6px">The bug:</p><div class="pill-row" id="bugRow' + ri + '">' + bugBtns + '</div>' +
+    '<p class="mut" style="font-size:13px;margin-bottom:6px">The fix:</p><div class="pill-row" id="fixRow' + ri + '">' + fixBtns + '</div>' +
+    '<div class="fb" id="rFb' + ri + '"></div>';
+  reviewsDiv.appendChild(card);
+});
+var reviewState = REVIEWS.map(function(){ return { bug:null, fix:null }; });
+function reviewCheck(ri){
+  var st = reviewState[ri], r = REVIEWS[ri];
+  if (st.bug === null || st.fix === null) return;
+  var pts = (st.bug === r.bug ? 1 : 0) + (st.fix === r.fix ? 1 : 0);
+  score.reviews[ri] = pts; updScore();
+  var fb = document.getElementById('rFb' + ri);
+  var badge = document.getElementById('rbadge' + ri);
+  if (pts === 2){
+    fb.className = 'fb show good';
+    fb.textContent = 'REVIEW APPROVED, 2/2. ' + r.debrief;
+    badge.className = 'badge solved'; badge.textContent = 'SOLVED 2/2';
+  } else {
+    fb.className = 'fb show bad';
+    fb.textContent = (pts === 1 ? 'Half right (1/2). ' : 'Not yet (0/2). ') + 'Re-read the snippet and the symptom line; the symptom always points at the bug. You can change your answers.';
+    badge.className = 'badge open'; badge.textContent = pts + '/2';
+  }
+}
+function pickBug(ri, i, el){
+  var row = document.getElementById('bugRow' + ri).children;
+  for (var j=0;j<row.length;j++) row[j].classList.remove('sel');
+  el.classList.add('sel');
+  reviewState[ri].bug = i; reviewCheck(ri);
+}
+function pickFixR(ri, i, el){
+  var row = document.getElementById('fixRow' + ri).children;
+  for (var j=0;j<row.length;j++) row[j].classList.remove('sel');
+  el.classList.add('sel');
+  reviewState[ri].fix = i; reviewCheck(ri);
+}
+
+// ===== SECTION 6: QUIZ =====
+var QUIZ = [
+  { q:'PowerShell cmdlets pass what between pipeline stages?', o:['Plain text','Objects with named properties','Compressed files','Screenshots of output'], a:1, fb:'Objects. Properties keep their names; text formatting does not keep its promises.' },
+  { q:'You are holding an object and want to know what it can tell you. Which command?', o:['Get-Command','Get-Help','Get-Member','Get-Process'], a:2, fb:'Get-Member lists every property and method: the questions an object can answer.' },
+  { q:'The most useful Get-Help switch for a working tech is:', o:['-Full','-Examples','-Online','-Verbose'], a:1, fb:'-Examples: working command lines, ready to adapt.' },
+  { q:'Why does PowerShell use -eq instead of = for comparison?', o:['It is faster','= was already taken by assignment, and reuse invites silent bugs','Microsoft patented the equals sign','-eq works in more languages'], a:1, fb:'Review A was this exact bug. Ugly and safe beats pretty and dangerous.' },
+  { q:'To test 50 machines instead of 3, a well-written foreach script changes:', o:['Nothing but the list of targets','The loop body','The whole structure','The execution policy'], a:0, fb:'The list grows; the script does not. That is the multiplier.' },
+  { q:'A fresh Windows 11 machine refuses to run your .ps1. The cause is:', o:['Missing admin rights','The Restricted execution policy default','A corrupted file','Defender quarantine'], a:1, fb:'Restricted is the client default. The fix: RemoteSigned, scoped to CurrentUser.' },
+  { q:'Why require .\\ to run a script from the current folder?', o:['It elevates to administrator','It stops a malicious local file from hijacking a common command name','It is decorative','It enables colors'], a:1, fb:'A file named ipconfig.ps1 in your folder should never silently win when you type ipconfig.' },
+  { q:'An Intune Remediation is:', o:['A Windows reinstall','A paired detect script and fix script run on a schedule across devices','A manual checklist','A backup policy'], a:1, fb:'Your if statement is detection logic. Write the else as a fix, deploy the pair, and machines heal themselves.' }
+];
+var quizDiv = document.getElementById('quiz');
+QUIZ.forEach(function(it, qi){
+  var d = document.createElement('div');
+  d.className = 'quiz-q';
+  d.innerHTML = '<div class="qt">' + (qi+1) + '. ' + it.q + '</div>' +
+    it.o.map(function(o, oi){ return '<button class="opt" onclick="answer(' + qi + ',' + oi + ',this)">' + o + '</button>'; }).join('') +
+    '<div class="fb" id="qfb' + qi + '"></div>';
+  quizDiv.appendChild(d);
+});
+var answered = {};
+function answer(qi, oi, el){
+  if (answered[qi]) return;
+  answered[qi] = true;
+  var it = QUIZ[qi];
+  var fb = document.getElementById('qfb' + qi);
+  var opts = el.parentNode.querySelectorAll('.opt');
+  opts[it.a].classList.add('right');
+  if (oi === it.a){
+    score.quiz[qi] = 1;
+    fb.className = 'fb show good'; fb.textContent = 'Correct. ' + it.fb;
+  } else {
+    score.quiz[qi] = 0;
+    el.classList.add('wrong');
+    fb.className = 'fb show bad'; fb.textContent = it.fb;
+  }
+  updScore();
+  if (Object.keys(answered).length === QUIZ.length) finalReport();
+}
+function finalReport(){
+  var t = score.total();
+  document.getElementById('finalBox').style.display = 'block';
+  document.getElementById('finalScore').textContent = t + ' / 16';
+  var msg;
+  if (t >= 15) msg = 'Scripter grade with honors. The forge has nothing left to teach you; the lab does.';
+  else if (t >= 13) msg = 'Scripter grade. You read code like a reviewer now. Go build the real thing.';
+  else if (t >= 9) msg = 'Solid groundwork. Re-run the code reviews; their four bugs are the four mistakes the lab grades against.';
+  else msg = 'Reload and run it again. Spend extra time in the pipeline builder and the assembly; the lab assumes both.';
+  document.getElementById('finalMsg').textContent = msg;
+  document.getElementById('finalBox').scrollIntoView({ behavior:'smooth' });
+}
+updScore();
+
+</script>
+</body>
+</html>
